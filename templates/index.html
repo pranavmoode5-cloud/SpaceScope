@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SpaceScope | Big Data Analytics & Mission Operations Platform</title>
+  <title>SpaceScope — Global Orbital Launch Intelligence & Analytics</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="/static/js/chart.umd.min.js"></script>
   <script>
     if (typeof Chart === 'undefined') {
@@ -15,47 +15,50 @@
   </script>
   <style>
     :root {
-      --bg-primary: #060913;
-      --bg-secondary: #0d1322;
-      --bg-card: rgba(15, 23, 42, 0.78);
-      --bg-card-hover: rgba(22, 34, 61, 0.9);
-      --border-color: rgba(56, 189, 248, 0.16);
-      --border-focus: rgba(56, 189, 248, 0.55);
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --accent-cyan: #38bdf8;
-      --accent-blue: #3b82f6;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
-      --accent-purple: #a855f7;
-      --glow-cyan: rgba(56, 189, 248, 0.25);
+      --bg-primary: #0d1219;
+      --bg-secondary: #131922;
+      --bg-surface: #18202c;
+      --bg-surface-elevated: #1f2837;
+      --border-subtle: #252f40;
+      --border-strong: #37465e;
+      --text-primary: #edf2f7;
+      --text-secondary: #8e9cae;
+      --text-tertiary: #5f6e80;
+      --accent-brass: #c89553;
+      --accent-brass-subtle: rgba(200, 149, 83, 0.15);
+      --accent-steel: #4f7396;
+      --accent-steel-subtle: rgba(79, 115, 150, 0.16);
+      --status-ok: #3d8864;
+      --status-ok-bg: rgba(61, 136, 100, 0.14);
+      --status-warn: #b87a3b;
+      --status-warn-bg: rgba(184, 122, 59, 0.14);
+      --status-alert: #9e4343;
+      --status-alert-bg: rgba(158, 67, 67, 0.14);
+      --font-serif: 'EB Garamond', Garamond, 'Times New Roman', Georgia, serif;
+      --font-sans: 'Anek Latin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, Menlo, monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg-primary);
-      background-image: 
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.14), transparent),
-        radial-gradient(circle at 10% 40%, rgba(168, 85, 247, 0.08), transparent),
-        radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.06), transparent);
-      color: var(--text-main);
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
       min-height: 100vh;
-      line-height: 1.5;
+      line-height: 1.55;
       padding-bottom: 4rem;
+      -webkit-font-smoothing: antialiased;
     }
 
+    /* Header & Situation Room Banner */
     header {
-      border-bottom: 1px solid var(--border-color);
-      backdrop-filter: blur(14px);
-      background: rgba(6, 9, 19, 0.85);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-secondary);
       position: sticky;
       top: 0;
       z-index: 100;
-      padding: 0.85rem 2rem;
+      padding: 0.9rem 2.2rem;
     }
 
     .header-container {
@@ -65,80 +68,77 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .brand {
       display: flex;
-      align-items: center;
+      align-items: baseline;
       gap: 0.85rem;
       text-decoration: none;
     }
 
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, #0284c7, #6366f1);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      box-shadow: 0 0 20px var(--glow-cyan);
-    }
-
-    .brand-text h1 {
-      font-size: 1.35rem;
+    .brand-mark {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #fff;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
     }
 
-    .brand-text p {
-      font-size: 0.72rem;
-      color: var(--accent-cyan);
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.05em;
+    .brand-rule {
+      width: 1px;
+      height: 18px;
+      background: var(--border-strong);
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .brand-sub {
+      font-size: 0.76rem;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
     }
 
     /* Workspace Switcher */
     .workspace-nav {
       display: flex;
-      background: rgba(15, 23, 42, 0.9);
-      padding: 0.3rem;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-      gap: 0.35rem;
+      background: var(--bg-primary);
+      padding: 0.25rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      gap: 0.25rem;
     }
 
     .nav-tab-btn {
       background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 0.5rem 1rem;
-      border-radius: 7px;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      padding: 0.45rem 1rem;
+      border-radius: 3px;
       font-size: 0.82rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      transition: all 0.2s ease;
-      font-family: inherit;
+      font-family: var(--font-sans);
+      transition: all 0.15s ease;
     }
 
     .nav-tab-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.03);
     }
 
     .nav-tab-btn.active {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.25));
-      color: var(--accent-cyan);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+      font-weight: 600;
     }
 
+    /* Situation Room Telemetry Pill */
     .header-status {
       display: flex;
       align-items: center;
@@ -148,53 +148,40 @@
     .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 0.4rem 0.9rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--accent-emerald);
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+      gap: 0.55rem;
+      background: var(--status-ok-bg);
+      border: 1px solid rgba(61, 136, 100, 0.35);
+      padding: 0.35rem 0.85rem;
+      border-radius: 3px;
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      color: #72b392;
+      letter-spacing: 0.03em;
     }
 
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: var(--accent-emerald);
-      box-shadow: 0 0 8px var(--accent-emerald);
-      animation: pulse 2s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+      background: var(--status-ok);
     }
 
     main {
       max-width: 1440px;
       margin: 2rem auto;
-      padding: 0 1.5rem;
+      padding: 0 2rem;
     }
 
     /* Tab Sections */
     .tab-content {
       display: none;
-      animation: fadeIn 0.25s ease-in-out;
     }
 
     .tab-content.active {
       display: block;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* KPI Grid */
+    /* Situation Room KPI Row */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -203,56 +190,35 @@
     }
 
     .kpi-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 1.25rem;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-      position: relative;
-      overflow: hidden;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 1.25rem 1.4rem;
+      border-left: 3px solid var(--accent-steel);
     }
-
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--border-focus);
-      background: var(--bg-card-hover);
-    }
-
-    .kpi-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .kpi-card:hover::before { opacity: 1; }
 
     .kpi-label {
-      font-size: 0.78rem;
-      color: var(--text-muted);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.4rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
     }
 
     .kpi-value {
-      font-size: 1.85rem;
-      font-weight: 700;
-      color: #fff;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: -0.03em;
+      font-size: 2.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: var(--font-serif);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
     }
 
     .kpi-subtext {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      margin-top: 0.35rem;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      margin-top: 0.4rem;
     }
 
     /* Charts Grid */
@@ -264,11 +230,10 @@
     }
 
     .chart-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.25rem;
-      backdrop-filter: blur(10px);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 1.4rem;
       display: flex;
       flex-direction: column;
     }
@@ -285,67 +250,67 @@
     .chart-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
       margin-bottom: 1.25rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .chart-title {
-      font-size: 0.95rem;
+      font-size: 1.05rem;
+      font-family: var(--font-serif);
       font-weight: 600;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
     }
 
     .chart-badge {
-      font-size: 0.68rem;
-      font-family: 'JetBrains Mono', monospace;
-      background: rgba(56, 189, 248, 0.1);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
       padding: 0.2rem 0.5rem;
-      border-radius: 4px;
+      border-radius: 3px;
     }
 
     .chart-body {
       flex: 1;
       position: relative;
-      min-height: 260px;
+      min-height: 270px;
     }
 
-    /* CRUD Studio & Table Styling */
+    /* Studio & CRUD Panels */
     .studio-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1.5rem;
-      backdrop-filter: blur(12px);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 1.6rem;
       margin-bottom: 2rem;
     }
 
     .studio-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 1.25rem;
       margin-bottom: 1.5rem;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .studio-title-group h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      font-size: 1.45rem;
+      font-family: var(--font-serif);
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
     }
 
     .studio-title-group p {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
       margin-top: 0.25rem;
     }
 
@@ -353,62 +318,61 @@
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 0.65rem;
+      gap: 0.6rem;
     }
 
+    /* Button System */
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.55rem 1rem;
-      border-radius: 8px;
+      gap: 0.45rem;
+      padding: 0.5rem 0.95rem;
+      border-radius: 3px;
       font-size: 0.82rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s ease;
+      font-family: var(--font-sans);
+      transition: all 0.15s ease;
       border: 1px solid transparent;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #0284c7, #2563eb);
+      background: var(--accent-steel);
       color: #fff;
-      border-color: rgba(56, 189, 248, 0.4);
-      box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
+      border-color: #5c84aa;
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, #0369a1, #1d4ed8);
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+      background: #416180;
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-      border-color: var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.09);
-      border-color: var(--border-focus);
+      background: var(--border-subtle);
+      border-color: var(--border-strong);
     }
 
     .btn-danger {
-      background: rgba(244, 63, 94, 0.15);
-      color: var(--accent-rose);
-      border-color: rgba(244, 63, 94, 0.3);
+      background: var(--status-alert-bg);
+      color: #d17575;
+      border-color: rgba(158, 67, 67, 0.4);
     }
 
     .btn-danger:hover {
-      background: rgba(244, 63, 94, 0.25);
+      background: rgba(158, 67, 67, 0.25);
     }
 
     .btn-sm {
       padding: 0.3rem 0.65rem;
-      font-size: 0.75rem;
-      border-radius: 6px;
+      font-size: 0.76rem;
     }
 
+    /* Filters Toolbar */
     .toolbar-row {
       display: flex;
       justify-content: space-between;
@@ -426,114 +390,104 @@
 
     .search-input {
       width: 100%;
-      background: rgba(2, 6, 23, 0.6);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 0.6rem 1rem 0.6rem 2.25rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-family: inherit;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.55rem 0.9rem;
+      border-radius: 3px;
+      font-size: 0.84rem;
+      font-family: var(--font-sans);
       outline: none;
-      transition: all 0.2s;
     }
 
     .search-input:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-dim);
-      font-size: 0.85rem;
+      border-color: var(--border-strong);
     }
 
     .filter-select {
-      background: rgba(2, 6, 23, 0.7);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 0.55rem 0.9rem;
-      border-radius: 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.55rem 0.85rem;
+      border-radius: 3px;
       font-size: 0.82rem;
       outline: none;
-      font-family: inherit;
+      font-family: var(--font-sans);
     }
 
-    /* Table */
+    /* Situation Room Data Table */
     .table-responsive {
       overflow-x: auto;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-primary);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.83rem;
+      font-size: 0.82rem;
       text-align: left;
     }
 
     th {
-      background: rgba(2, 6, 23, 0.75);
-      color: var(--text-muted);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
       font-weight: 600;
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-      font-family: 'JetBrains Mono', monospace;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      font-family: var(--font-sans);
       font-size: 0.74rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid rgba(56, 189, 248, 0.07);
-      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
       vertical-align: middle;
     }
 
     tr:hover td {
-      background: rgba(56, 189, 248, 0.04);
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .id-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      color: var(--accent-cyan);
-      background: rgba(56, 189, 248, 0.1);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
       padding: 0.15rem 0.45rem;
-      border-radius: 4px;
-      display: inline-block;
+      border-radius: 2px;
+      border: 1px solid var(--border-subtle);
     }
 
     .badge-status {
       display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 9999px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 2px;
       font-size: 0.72rem;
       font-weight: 500;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--font-sans);
     }
 
     .badge-success {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-emerald);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: var(--status-ok-bg);
+      color: #72b392;
+      border: 1px solid rgba(61, 136, 100, 0.35);
     }
 
     .badge-failure {
-      background: rgba(244, 63, 94, 0.15);
-      color: var(--accent-rose);
-      border: 1px solid rgba(244, 63, 94, 0.3);
+      background: var(--status-alert-bg);
+      color: #d17575;
+      border: 1px solid rgba(158, 67, 67, 0.35);
     }
 
     .badge-partial {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--accent-amber);
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: var(--status-warn-bg);
+      color: #d89858;
+      border: 1px solid rgba(184, 122, 59, 0.35);
     }
 
     .pagination-bar {
@@ -544,8 +498,8 @@
       flex-wrap: wrap;
       gap: 1rem;
       font-size: 0.8rem;
-      color: var(--text-muted);
-      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
     }
 
     .pagination-btns {
@@ -558,8 +512,8 @@
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(2, 6, 23, 0.85);
-      backdrop-filter: blur(8px);
+      background: rgba(8, 12, 17, 0.85);
+      backdrop-filter: blur(4px);
       z-index: 999;
       justify-content: center;
       align-items: center;
@@ -568,48 +522,44 @@
 
     .modal-backdrop.open {
       display: flex;
-      animation: modalFade 0.2s ease-out;
-    }
-
-    @keyframes modalFade {
-      from { opacity: 0; transform: scale(0.96); }
-      to { opacity: 1; transform: scale(1); }
     }
 
     .modal-box {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-focus);
-      box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
-      border-radius: 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
       width: 100%;
-      max-width: 600px;
+      max-width: 580px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
     }
 
     .modal-header {
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border-color);
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: var(--bg-secondary);
     }
 
     .modal-header h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.2rem;
+      font-family: var(--font-serif);
+      font-weight: 600;
     }
 
     .close-btn {
       background: transparent;
       border: none;
-      color: var(--text-muted);
-      font-size: 1.25rem;
+      color: var(--text-secondary);
+      font-size: 1.3rem;
       cursor: pointer;
     }
 
-    .close-btn:hover { color: #fff; }
+    .close-btn:hover { color: var(--text-primary); }
 
     .modal-body {
       padding: 1.5rem;
@@ -624,41 +574,40 @@
 
     .form-group label {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       margin-bottom: 0.35rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
     }
 
     .form-input {
       width: 100%;
-      background: rgba(2, 6, 23, 0.7);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 0.6rem 0.85rem;
-      border-radius: 7px;
-      font-size: 0.85rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.55rem 0.75rem;
+      border-radius: 3px;
+      font-size: 0.84rem;
       outline: none;
-      font-family: inherit;
+      font-family: var(--font-sans);
     }
 
     .form-input:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+      border-color: var(--border-strong);
     }
 
     .modal-footer {
       padding: 1rem 1.5rem;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;
-      background: rgba(6, 9, 19, 0.5);
+      background: var(--bg-secondary);
     }
 
-    /* BDT Big Data Essence Platform */
+    /* BDT Big Data Section */
     .bdt-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
@@ -668,10 +617,11 @@
 
     .bdt-banner {
       grid-column: span 12;
-      background: linear-gradient(135deg, rgba(2, 132, 199, 0.15), rgba(99, 102, 241, 0.15));
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 14px;
-      padding: 1.5rem 2rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--accent-brass);
+      border-radius: 4px;
+      padding: 1.5rem 1.8rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -680,139 +630,138 @@
     }
 
     .bdt-banner-text h2 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #fff;
+      font-size: 1.35rem;
+      font-family: var(--font-serif);
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .bdt-banner-text p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      font-size: 0.84rem;
+      color: var(--text-secondary);
       margin-top: 0.25rem;
-      max-width: 780px;
+      max-width: 820px;
     }
 
     .dag-container {
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      padding: 1rem 0;
+      padding: 0.8rem 0;
     }
 
     .dag-flow {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       overflow-x: auto;
-      padding: 1rem 0.5rem;
+      padding: 0.5rem 0;
     }
 
     .dag-node {
-      background: rgba(2, 6, 23, 0.8);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 3px;
       padding: 1rem;
-      min-width: 170px;
+      min-width: 175px;
       flex: 1;
-      text-align: center;
-      position: relative;
-      transition: all 0.2s;
+      text-align: left;
     }
 
     .dag-node:hover {
-      border-color: var(--accent-cyan);
-      transform: translateY(-2px);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+      border-color: var(--border-strong);
     }
 
     .dag-node-stage {
-      font-size: 0.68rem;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--accent-cyan);
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--accent-brass);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
     }
 
     .dag-node-title {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 600;
-      margin: 0.3rem 0;
-      color: #fff;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
     }
 
     .dag-node-desc {
-      font-size: 0.72rem;
-      color: var(--text-muted);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
     }
 
     .dag-arrow {
-      color: var(--accent-cyan);
-      font-size: 1.2rem;
-      font-weight: 700;
+      color: var(--text-tertiary);
+      font-size: 1.1rem;
+      font-family: var(--font-mono);
     }
 
-    /* 5 V's Grid */
+    /* 5 V's Matrix */
     .five-vs-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 1rem;
-      margin-top: 1rem;
+      margin-top: 0.8rem;
     }
 
     @media (max-width: 1024px) {
-      .five-vs-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+      .five-vs-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
     }
 
     .v-card {
-      background: rgba(2, 6, 23, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 3px;
       padding: 1.25rem;
-      border-top: 3px solid var(--accent-cyan);
+      border-top: 3px solid var(--accent-steel);
     }
 
     .v-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 1.05rem;
+      font-family: var(--font-serif);
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .v-subtitle {
-      font-size: 0.72rem;
-      color: var(--accent-cyan);
-      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent-brass);
+      font-family: var(--font-mono);
       margin: 0.3rem 0 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .v-desc {
       font-size: 0.78rem;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       line-height: 1.45;
     }
 
-    /* Stream Simulator Box */
+    /* Simulator Terminal */
     .simulator-box {
-      background: rgba(2, 6, 23, 0.9);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 1.25rem;
-      font-family: 'JetBrains Mono', monospace;
-      margin-top: 1rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 3px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      margin-top: 0.8rem;
     }
 
     .simulator-terminal {
-      background: #02040a;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 1rem;
-      height: 180px;
+      background: #090d13;
+      border: 1px solid #1c2534;
+      border-radius: 3px;
+      padding: 0.9rem;
+      height: 170px;
       overflow-y: auto;
-      font-size: 0.78rem;
-      color: var(--accent-emerald);
+      font-size: 0.76rem;
+      color: #79a890;
       display: flex;
       flex-direction: column-reverse;
       gap: 0.35rem;
@@ -830,37 +779,28 @@
     }
 
     .toast {
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid var(--border-focus);
-      color: #fff;
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 0.75rem 1.2rem;
+      border-radius: 3px;
       font-size: 0.82rem;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      animation: slideIn 0.25s ease-out;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     }
 
     /* Footer */
     footer {
       max-width: 1440px;
       margin: 3.5rem auto 0;
-      padding: 1.5rem;
-      border-top: 1px solid var(--border-color);
+      padding: 1.5rem 2rem;
+      border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
       font-size: 0.8rem;
-      color: var(--text-dim);
+      color: var(--text-secondary);
     }
   </style>
 </head>
@@ -870,31 +810,29 @@
   <header>
     <div class="header-container">
       <a href="/" class="brand">
-        <div class="brand-icon">🚀</div>
-        <div class="brand-text">
-          <h1>SpaceScope</h1>
-          <p>BIG DATA ANALYTICS // MISSION OPERATIONS STUDIO</p>
-        </div>
+        <span class="brand-mark">SpaceScope</span>
+        <span class="brand-rule"></span>
+        <span class="brand-sub">Orbital Launch Intelligence</span>
       </a>
 
       <!-- Workspace Switcher Navigation -->
       <nav class="workspace-nav">
         <button class="nav-tab-btn active" data-tab="tab-analytics" onclick="switchTab('tab-analytics')">
-          <span>📊</span> Analytics Hub
+          Analytics Hub
         </button>
         <button class="nav-tab-btn" data-tab="tab-crud" onclick="switchTab('tab-crud')">
-          <span>🛠️</span> Mission Operations (CRUD)
+          Mission Operations (CRUD)
         </button>
         <button class="nav-tab-btn" data-tab="tab-bdt" onclick="switchTab('tab-bdt')">
-          <span>⚡</span> BDT Spark Engine & Lab
+          BDT Spark Engine & Lab
         </button>
       </nav>
 
       <!-- Live Telemetry Pill -->
       <div class="header-status">
-        <div class="status-pill" id="telemetry-pill" title="PySpark Distributed Engine + MongoDB Storage">
+        <div class="status-pill" id="telemetry-pill">
           <div class="status-dot"></div>
-          <span id="system-status">BDT ENGINE: ONLINE (4,324 Records)</span>
+          <span id="system-status">ENGINE READY (4,324 Records)</span>
         </div>
       </div>
     </div>
@@ -906,29 +844,29 @@
       <!-- KPI Overview -->
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-label">Total Missions <span>🌐</span></div>
+          <div class="kpi-label">Total Missions</div>
           <div class="kpi-value" id="kpi-missions">--</div>
-          <div class="kpi-subtext" id="kpi-years">Historical Launch Attempts</div>
+          <div class="kpi-subtext" id="kpi-years">Recorded Orbital Attempts</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Mission Success Rate <span>🎯</span></div>
+        <div class="kpi-card" style="border-left-color: var(--accent-brass);">
+          <div class="kpi-label">Success Rate</div>
           <div class="kpi-value" id="kpi-success">--%</div>
-          <div class="kpi-subtext">Overall Orbital Flights</div>
+          <div class="kpi-subtext">Verified Orbital Insertion</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Space Organizations <span>🏛️</span></div>
+          <div class="kpi-label">Organizations</div>
           <div class="kpi-value" id="kpi-orgs">--</div>
-          <div class="kpi-subtext">Global Agencies & Commercials</div>
+          <div class="kpi-subtext">Agencies and Commercial Operators</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Rocket Classes <span>🚀</span></div>
+          <div class="kpi-label">Launch Vehicles</div>
           <div class="kpi-value" id="kpi-rockets">--</div>
-          <div class="kpi-subtext">Distinct Launch Vehicles</div>
+          <div class="kpi-subtext">Distinct Rocket Configurations</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Spacefaring Nations <span>🌍</span></div>
+          <div class="kpi-label">Spacefaring Nations</div>
           <div class="kpi-value" id="kpi-countries">--</div>
-          <div class="kpi-subtext">Active Launch Territories</div>
+          <div class="kpi-subtext">Sovereign Territories and Sites</div>
         </div>
       </div>
 
@@ -937,8 +875,8 @@
         <!-- Yearly Cadence -->
         <div class="chart-card col-12">
           <div class="chart-header">
-            <div class="chart-title">Historical Launch Cadence Over Time</div>
-            <span class="chart-badge">1957 - Present</span>
+            <div class="chart-title">Historical Launch Cadence (1957 – Present)</div>
+            <span class="chart-badge">Chronological</span>
           </div>
           <div class="chart-body">
             <canvas id="yearlyChart"></canvas>
@@ -948,8 +886,8 @@
         <!-- Top Organizations -->
         <div class="chart-card col-8">
           <div class="chart-header">
-            <div class="chart-title">Missions by Top Space Organizations</div>
-            <span class="chart-badge">Leaderboard</span>
+            <div class="chart-title">Launches by Leading Space Organizations</div>
+            <span class="chart-badge">Primary Operators</span>
           </div>
           <div class="chart-body">
             <canvas id="orgChart"></canvas>
@@ -959,8 +897,8 @@
         <!-- Outcome Distribution -->
         <div class="chart-card col-4">
           <div class="chart-header">
-            <div class="chart-title">Mission Outcomes</div>
-            <span class="chart-badge">Reliability</span>
+            <div class="chart-title">Mission Outcome Distribution</div>
+            <span class="chart-badge">Flight Status</span>
           </div>
           <div class="chart-body">
             <canvas id="outcomeChart"></canvas>
@@ -970,7 +908,7 @@
         <!-- Country Distribution -->
         <div class="chart-card col-6">
           <div class="chart-header">
-            <div class="chart-title">Launches by Nation / Territory</div>
+            <div class="chart-title">Launches by Nation / Operating Territory</div>
             <span class="chart-badge">Geographic</span>
           </div>
           <div class="chart-body">
@@ -981,8 +919,8 @@
         <!-- Mission Profiles -->
         <div class="chart-card col-6">
           <div class="chart-header">
-            <div class="chart-title">Mission Type & Payload Profile</div>
-            <span class="chart-badge">Categorization</span>
+            <div class="chart-title">Mission Objective Profile</div>
+            <span class="chart-badge">Application</span>
           </div>
           <div class="chart-body">
             <canvas id="typeChart"></canvas>
@@ -996,21 +934,21 @@
       <div class="studio-panel">
         <div class="studio-header">
           <div class="studio-title-group">
-            <h2><span>🛠️</span> Mission Operations Studio (Flight Log Explorer)</h2>
-            <p>Enterprise data management platform with live CRUD mutations and instant analytical synchronization</p>
+            <h2>Mission Operations Studio (Flight Log Explorer)</h2>
+            <p>Data operations terminal supporting Create, Read, Update, and Delete actions with synchronous analytical recalibration</p>
           </div>
           <div class="studio-actions">
             <button class="btn btn-primary" onclick="openCreateModal()">
-              <span>➕</span> Launch New Mission
+              Log New Launch
             </button>
             <button class="btn btn-secondary" onclick="exportCSV()">
-              <span>📥</span> Export CSV
+              Export CSV
             </button>
             <button class="btn btn-secondary" onclick="exportJSON()">
-              <span>📄</span> Export JSON
+              Export JSON
             </button>
             <button class="btn btn-secondary" onclick="resetDataset()">
-              <span>🔄</span> Reset to Baseline
+              Reset Baseline
             </button>
           </div>
         </div>
@@ -1018,20 +956,19 @@
         <!-- Toolbar Filters -->
         <div class="toolbar-row">
           <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="crud-search" class="search-input" placeholder="Search by Mission ID, Organization, Rocket, Site, or Details..." oninput="debounceSearch()">
+            <input type="text" id="crud-search" class="search-input" placeholder="Search mission records by agency, vehicle, site, or identifier..." oninput="debounceSearch()">
           </div>
-          <div style="display: flex; gap: 0.75rem;">
+          <div style="display: flex; gap: 0.65rem;">
             <select id="crud-status-filter" class="filter-select" onchange="applyFilters()">
-              <option value="">All Outcomes</option>
+              <option value="">All Flight Outcomes</option>
               <option value="Success">Success</option>
               <option value="Failure">Failure</option>
               <option value="Partial">Partial Failure</option>
             </select>
             <select id="crud-page-size" class="filter-select" onchange="changePageSize()">
-              <option value="15">15 rows / page</option>
-              <option value="25">25 rows / page</option>
-              <option value="50">50 rows / page</option>
+              <option value="15">15 records / page</option>
+              <option value="25">25 records / page</option>
+              <option value="50">50 records / page</option>
             </select>
           </div>
         </div>
@@ -1045,15 +982,15 @@
                 <th>Year</th>
                 <th>Date</th>
                 <th>Organization</th>
-                <th>Vehicle / Rocket</th>
-                <th>Site & Location</th>
+                <th>Launch Vehicle</th>
+                <th>Site Location</th>
                 <th>Country</th>
                 <th>Outcome</th>
                 <th style="text-align: right;">Actions</th>
               </tr>
             </thead>
             <tbody id="crud-table-body">
-              <tr><td colspan="9" style="text-align: center; color: var(--text-dim); padding: 2rem;">Loading mission records...</td></tr>
+              <tr><td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 1.8rem;">Retrieving mission records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1062,8 +999,8 @@
         <div class="pagination-bar">
           <span id="crud-page-info">Showing page 1 of --</span>
           <div class="pagination-btns">
-            <button id="crud-btn-prev" class="btn btn-secondary btn-sm" onclick="changePage(-1)" disabled>← Previous</button>
-            <button id="crud-btn-next" class="btn btn-secondary btn-sm" onclick="changePage(1)">Next →</button>
+            <button id="crud-btn-prev" class="btn btn-secondary btn-sm" onclick="changePage(-1)" disabled>Previous</button>
+            <button id="crud-btn-next" class="btn btn-secondary btn-sm" onclick="changePage(1)">Next</button>
           </div>
         </div>
       </div>
@@ -1074,15 +1011,15 @@
       <!-- BDT Header Banner -->
       <div class="bdt-banner">
         <div class="bdt-banner-text">
-          <h2>⚡ Big Data Technologies (BDT) Distributed Processing Engine</h2>
-          <p>SpaceScope implements an end-to-end Big Data Lakehouse pipeline: PySpark Distributed RDD/DataFrame processing across multi-core partitions, Catalyst query optimization, and indexed MongoDB document persistence.</p>
+          <h2>Big Data Technologies (BDT) Distributed Processing Architecture</h2>
+          <p>SpaceScope implements an analytical lakehouse workflow: Apache Spark distributed DataFrame processing across multi-core partitions, Catalyst query optimization, and indexed document persistence.</p>
         </div>
-        <div style="display: flex; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.65rem;">
           <button class="btn btn-primary" onclick="simulateStreamLaunch()">
-            <span>⚡</span> Emit Stream Launch
+            Emit Launch Event
           </button>
           <button class="btn btn-secondary" onclick="toggleStreamSimulator()">
-            <span id="stream-btn-icon">▶</span> <span id="stream-btn-text">Start Telemetry Stream</span>
+            <span id="stream-btn-text">Start Telemetry Stream</span>
           </button>
         </div>
       </div>
@@ -1092,42 +1029,42 @@
         <div class="chart-card col-8">
           <div class="chart-header">
             <div class="chart-title">PySpark vs Pandas Execution Scaling Benchmark</div>
-            <span class="chart-badge">Volume Scaling (1x vs 5x)</span>
+            <span class="chart-badge">Evaluation Matrix (1x vs 5x)</span>
           </div>
           <div class="chart-body">
             <canvas id="bdtBenchmarkChart"></canvas>
           </div>
-          <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.75rem; font-family: 'JetBrains Mono', monospace;">
-            Source: SpaceScope Research Paper Table VII (Empirical Execution Evaluation across 4,324 vs 21,621 records).
+          <div style="font-size: 0.76rem; color: var(--text-tertiary); margin-top: 0.75rem; font-family: var(--font-mono);">
+            Empirical runtime performance: SpaceScope Research Paper (Table VII), measured across 4,324 vs 21,620 launch attempts.
           </div>
         </div>
 
         <!-- Latency & Architecture Specs -->
         <div class="chart-card col-4">
           <div class="chart-header">
-            <div class="chart-title">Engine Architecture Specs</div>
-            <span class="chart-badge">Specs</span>
+            <div class="chart-title">Architecture Specifications</div>
+            <span class="chart-badge">Configuration</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 0.85rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
-            <div style="background: rgba(2, 6, 23, 0.6); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
-              <div style="color: var(--accent-cyan);">EXECUTION ENGINE</div>
-              <div style="font-size: 0.95rem; color: #fff; font-weight: 600;">Apache Spark 3.x / PySpark</div>
-              <div style="color: var(--text-dim); font-size: 0.7rem;">Catalyst Optimizer + SQL Catalyst</div>
+          <div style="display: flex; flex-direction: column; gap: 0.85rem; font-family: var(--font-mono); font-size: 0.8rem;">
+            <div style="background: var(--bg-primary); padding: 0.8rem; border-radius: 3px; border: 1px solid var(--border-subtle);">
+              <div style="color: var(--accent-brass); font-size: 0.72rem; text-transform: uppercase;">Execution Framework</div>
+              <div style="font-size: 0.95rem; color: var(--text-primary); font-weight: 600;">Apache Spark 3.x / PySpark</div>
+              <div style="color: var(--text-tertiary); font-size: 0.72rem;">Catalyst Optimizer & SQL Execution</div>
             </div>
-            <div style="background: rgba(2, 6, 23, 0.6); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
-              <div style="color: var(--accent-emerald);">DOCUMENT LAKEHOUSE</div>
-              <div style="font-size: 0.95rem; color: #fff; font-weight: 600;">MongoDB Collections</div>
-              <div style="color: var(--text-dim); font-size: 0.7rem;">Missions, Orgs, Rockets, Sites</div>
+            <div style="background: var(--bg-primary); padding: 0.8rem; border-radius: 3px; border: 1px solid var(--border-subtle);">
+              <div style="color: #72b392; font-size: 0.72rem; text-transform: uppercase;">Storage Layer</div>
+              <div style="font-size: 0.95rem; color: var(--text-primary); font-weight: 600;">MongoDB Document Collections</div>
+              <div style="color: var(--text-tertiary); font-size: 0.72rem;">Missions, Organizations, Rockets, Sites</div>
             </div>
-            <div style="background: rgba(2, 6, 23, 0.6); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
-              <div style="color: var(--accent-amber);">AVERAGE QUERY LATENCY</div>
-              <div style="font-size: 0.95rem; color: #fff; font-weight: 600;">0.16 ms / query</div>
-              <div style="color: var(--text-dim); font-size: 0.7rem;">Sub-millisecond REST serving</div>
+            <div style="background: var(--bg-primary); padding: 0.8rem; border-radius: 3px; border: 1px solid var(--border-subtle);">
+              <div style="color: var(--accent-steel); font-size: 0.72rem; text-transform: uppercase;">Average Query Latency</div>
+              <div style="font-size: 0.95rem; color: var(--text-primary); font-weight: 600;">0.16 ms per request</div>
+              <div style="color: var(--text-tertiary); font-size: 0.72rem;">Sub-millisecond REST API serving</div>
             </div>
-            <div style="background: rgba(2, 6, 23, 0.6); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
-              <div style="color: var(--accent-purple);">PARTITION DISTRIBUTION</div>
-              <div style="font-size: 0.95rem; color: #fff; font-weight: 600;">4 Parallel Partitions</div>
-              <div style="color: var(--text-dim); font-size: 0.7rem;">Balanced HashPartitioning</div>
+            <div style="background: var(--bg-primary); padding: 0.8rem; border-radius: 3px; border: 1px solid var(--border-subtle);">
+              <div style="color: #9f88c8; font-size: 0.72rem; text-transform: uppercase;">Data Partitioning</div>
+              <div style="font-size: 0.95rem; color: var(--text-primary); font-weight: 600;">4 Balanced Partitions</div>
+              <div style="color: var(--text-tertiary); font-size: 0.72rem;">Distributed Hash Partitioning</div>
             </div>
           </div>
         </div>
@@ -1135,88 +1072,88 @@
         <!-- Spark Execution Plan DAG -->
         <div class="chart-card col-12">
           <div class="chart-header">
-            <div class="chart-title">PySpark Distributed Execution Plan (Directed Acyclic Graph)</div>
-            <span class="chart-badge">Stage Pipeline</span>
+            <div class="chart-title">Distributed Execution Plan (Directed Acyclic Graph)</div>
+            <span class="chart-badge">Pipeline Stages</span>
           </div>
           <div class="dag-container">
             <div class="dag-flow">
               <div class="dag-node">
-                <div class="dag-node-stage">Stage 0 (Ingest)</div>
+                <div class="dag-node-stage">Stage 0 · Ingestion</div>
                 <div class="dag-node-title">Multi-Source Ingest</div>
-                <div class="dag-node-desc">Kaggle + UNOOSA data read into 4 Spark partitions</div>
+                <div class="dag-node-desc">Historical launch catalogs ingested into 4 distributed partitions</div>
               </div>
               <div class="dag-arrow">→</div>
               <div class="dag-node">
-                <div class="dag-node-stage">Stage 1 (Narrow)</div>
-                <div class="dag-node-title">Row Cleansing & Parsing</div>
-                <div class="dag-node-desc">Deduplication, date parsing to UTC, categorical clean</div>
+                <div class="dag-node-stage">Stage 1 · Narrow</div>
+                <div class="dag-node-title">Cleaning & Derivation</div>
+                <div class="dag-node-desc">Deduplication, UTC date standardisation, and location parsing</div>
               </div>
               <div class="dag-arrow">→</div>
               <div class="dag-node">
-                <div class="dag-node-stage">Stage 2 (Wide)</div>
-                <div class="dag-node-title">Shuffle & Exchange</div>
-                <div class="dag-node-desc">HashPartitioning shuffle by Year & Organization</div>
+                <div class="dag-node-stage">Stage 2 · Wide</div>
+                <div class="dag-node-title">Shuffle Exchange</div>
+                <div class="dag-node-desc">Hash-partitioned shuffle across year and operating agency keys</div>
               </div>
               <div class="dag-arrow">→</div>
               <div class="dag-node">
-                <div class="dag-node-stage">Stage 3 (Catalyst)</div>
+                <div class="dag-node-stage">Stage 3 · Catalyst</div>
                 <div class="dag-node-title">Distributed Aggregation</div>
-                <div class="dag-node-desc">Parallel GroupBy counts, success rates, rankings</div>
+                <div class="dag-node-desc">Parallel group-by metrics, national shares, and outcome ratios</div>
               </div>
               <div class="dag-arrow">→</div>
               <div class="dag-node">
-                <div class="dag-node-stage">Stage 4 (Sink)</div>
-                <div class="dag-node-title">MongoDB Lakehouse</div>
-                <div class="dag-node-desc">Indexed document persistence and REST API delivery</div>
+                <div class="dag-node-stage">Stage 4 · Storage</div>
+                <div class="dag-node-title">Lakehouse Sink</div>
+                <div class="dag-node-desc">Indexed document persistence and API edge serving</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- The 5 V's of Big Data in Global Space Missions -->
+        <!-- The 5 V's of Big Data -->
         <div class="chart-card col-12">
           <div class="chart-header">
-            <div class="chart-title">The 5 V's of Big Data in SpaceScope</div>
-            <span class="chart-badge">Big Data Core</span>
+            <div class="chart-title">The Five V's of Big Data in Global Launch Analysis</div>
+            <span class="chart-badge">Core Taxonomy</span>
           </div>
           <div class="five-vs-grid">
             <div class="v-card">
-              <div class="v-title"><span>📦</span> Volume</div>
-              <div class="v-subtitle">SCALABLE RECORDS</div>
-              <div class="v-desc">Scales from 4,324 historical launches (1957–2020) to 21,621+ synthetically multiplied stress-test datasets across Spark partitions.</div>
+              <div class="v-title">Volume</div>
+              <div class="v-subtitle">Historical Scale</div>
+              <div class="v-desc">Encompasses 4,324 recorded launch attempts (1957–2020), scaled to 21,620 replicated records to evaluate distributed cluster throughput.</div>
             </div>
-            <div class="v-card" style="border-top-color: var(--accent-emerald);">
-              <div class="v-title"><span>⚡</span> Velocity</div>
-              <div class="v-subtitle">STREAM INGESTION</div>
-              <div class="v-desc">Simulated micro-batch launch telemetry streaming at real-time intervals with instant recalculation of success rates and flight logs.</div>
+            <div class="v-card" style="border-top-color: var(--accent-brass);">
+              <div class="v-title">Velocity</div>
+              <div class="v-subtitle">Ingestion Speed</div>
+              <div class="v-desc">Simulated micro-batch stream ingestion at real-time cadences with instant recalculation of mission success rates and telemetry logs.</div>
             </div>
-            <div class="v-card" style="border-top-color: var(--accent-purple);">
-              <div class="v-title"><span>🧩</span> Variety</div>
-              <div class="v-subtitle">HETEROGENEOUS SCHEMAS</div>
-              <div class="v-desc">Integrates tabular launch logs, semi-structured JSON payloads, geographic coordinates, and historical agency nomenclature into unified schemas.</div>
+            <div class="v-card" style="border-top-color: var(--accent-steel);">
+              <div class="v-title">Variety</div>
+              <div class="v-subtitle">Data Formats</div>
+              <div class="v-desc">Reconciles tabular launch attempts, semi-structured payload records, geographic site coordinates, and diverse agency nomenclature.</div>
             </div>
-            <div class="v-card" style="border-top-color: var(--accent-rose);">
-              <div class="v-title"><span>🛡️</span> Veracity</div>
-              <div class="v-subtitle">DATA INTEGRITY</div>
-              <div class="v-desc">Automatic duplicate elimination, handling of multi-format UTC dates, null imputation, and zero-loss categorical normalization.</div>
+            <div class="v-card" style="border-top-color: #3d8864;">
+              <div class="v-title">Veracity</div>
+              <div class="v-subtitle">Data Integrity</div>
+              <div class="v-desc">Systematic deduplication (pruning 1 duplicate attempt), 100% timestamp/site validation, and explicit handling of missing values.</div>
             </div>
-            <div class="v-card" style="border-top-color: var(--accent-amber);">
-              <div class="v-title"><span>💎</span> Value</div>
-              <div class="v-subtitle">ACTIONABLE INSIGHTS</div>
-              <div class="v-desc">Identifies Cold War peak tempo (1971), modern commercial mega-constellation resurgence (2018), and national launch reliability metrics.</div>
+            <div class="v-card" style="border-top-color: #9e4343;">
+              <div class="v-title">Value</div>
+              <div class="v-subtitle">Strategic Intelligence</div>
+              <div class="v-desc">Extracts historical launch tempos, Cold War peak activity (1971), and modern commercial resurgence (2018) for policy and engineering analysis.</div>
             </div>
           </div>
         </div>
 
-        <!-- Real-Time Stream Simulator Console -->
+        <!-- Telemetry Stream Terminal -->
         <div class="chart-card col-12">
           <div class="chart-header">
-            <div class="chart-title">Real-Time Telemetry Stream Simulator (Velocity)</div>
+            <div class="chart-title">Real-Time Telemetry Stream Terminal (Velocity Simulator)</div>
             <span class="chart-badge" id="stream-status-badge">Stream: Idle</span>
           </div>
           <div class="simulator-box">
             <div class="simulator-terminal" id="stream-terminal">
-              <div>[SYSTEM] Spark Streaming Engine initialized. Ready to receive orbital launch telemetry.</div>
+              <div>[SYSTEM] Ingestion framework ready. Listening for orbital telemetry events.</div>
             </div>
           </div>
         </div>
@@ -1228,32 +1165,32 @@
   <div id="modal-create" class="modal-backdrop">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>➕ Launch New Mission</h3>
+        <h3>Log New Mission</h3>
         <button class="close-btn" onclick="closeModal('modal-create')">×</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Organization / Agency *</label>
+          <label>Operating Organization *</label>
           <input type="text" id="create-company" class="form-input" placeholder="e.g. SpaceX, NASA, ISRO" required>
         </div>
         <div class="form-group">
-          <label>Launch Vehicle / Rocket *</label>
-          <input type="text" id="create-rocket" class="form-input" placeholder="e.g. Falcon 9 Block 5, Starship" required>
+          <label>Launch Vehicle *</label>
+          <input type="text" id="create-rocket" class="form-input" placeholder="e.g. Falcon 9, Ariane 5" required>
         </div>
         <div class="form-group">
           <label>Launch Date (YYYY-MM-DD)</label>
           <input type="text" id="create-date" class="form-input" placeholder="2026-10-28">
         </div>
         <div class="form-group">
-          <label>Country / Territory</label>
-          <input type="text" id="create-country" class="form-input" placeholder="e.g. USA, India, China">
+          <label>Sovereign Country</label>
+          <input type="text" id="create-country" class="form-input" placeholder="e.g. USA, France, India">
         </div>
         <div class="form-group-full">
-          <label>Launch Site Location</label>
-          <input type="text" id="create-site" class="form-input" placeholder="e.g. Kennedy Space Center, Florida">
+          <label>Launch Site & Pad</label>
+          <input type="text" id="create-site" class="form-input" placeholder="e.g. Kennedy Space Center, LC-39A">
         </div>
         <div class="form-group">
-          <label>Mission Status</label>
+          <label>Flight Outcome</label>
           <select id="create-status" class="form-input">
             <option value="Success">Success</option>
             <option value="Failure">Failure</option>
@@ -1261,17 +1198,17 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Mission Profile / Type</label>
-          <input type="text" id="create-type" class="form-input" placeholder="e.g. Communication, Scientific">
+          <label>Mission Objective</label>
+          <input type="text" id="create-type" class="form-input" placeholder="e.g. Communications, Scientific">
         </div>
         <div class="form-group-full">
-          <label>Mission Details / Payload</label>
-          <input type="text" id="create-detail" class="form-input" placeholder="e.g. Starlink Constellation / Lunar Exploration">
+          <label>Payload & Flight Details</label>
+          <input type="text" id="create-detail" class="form-input" placeholder="e.g. Orbital Constellation Deployment">
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('modal-create')">Cancel</button>
-        <button class="btn btn-primary" onclick="submitCreateMission()">Launch Mission</button>
+        <button class="btn btn-primary" onclick="submitCreateMission()">Log Mission Record</button>
       </div>
     </div>
   </div>
@@ -1280,17 +1217,17 @@
   <div id="modal-edit" class="modal-backdrop">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>✏️ Edit Mission Record <span id="edit-id-label" class="id-badge"></span></h3>
+        <h3>Edit Mission Record <span id="edit-id-label" class="id-badge"></span></h3>
         <button class="close-btn" onclick="closeModal('modal-edit')">×</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit-id">
         <div class="form-group">
-          <label>Organization / Agency</label>
+          <label>Operating Organization</label>
           <input type="text" id="edit-company" class="form-input">
         </div>
         <div class="form-group">
-          <label>Launch Vehicle / Rocket</label>
+          <label>Launch Vehicle</label>
           <input type="text" id="edit-rocket" class="form-input">
         </div>
         <div class="form-group">
@@ -1298,7 +1235,7 @@
           <input type="text" id="edit-date" class="form-input">
         </div>
         <div class="form-group">
-          <label>Year</label>
+          <label>Recorded Year</label>
           <input type="number" id="edit-year" class="form-input">
         </div>
         <div class="form-group">
@@ -1306,11 +1243,11 @@
           <input type="text" id="edit-country" class="form-input">
         </div>
         <div class="form-group">
-          <label>Launch Site</label>
+          <label>Site Location</label>
           <input type="text" id="edit-site" class="form-input">
         </div>
         <div class="form-group">
-          <label>Mission Outcome</label>
+          <label>Flight Outcome</label>
           <select id="edit-status" class="form-input">
             <option value="Success">Success</option>
             <option value="Failure">Failure</option>
@@ -1318,7 +1255,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Mission Type</label>
+          <label>Objective Profile</label>
           <input type="text" id="edit-type" class="form-input">
         </div>
         <div class="form-group-full">
@@ -1338,9 +1275,9 @@
 
   <!-- Footer -->
   <footer>
-    <div>SpaceScope Big Data Platform // Apache Spark & MongoDB Lakehouse</div>
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent-cyan);">
-      API Endpoints: /api/missions | /api/bdt/benchmarks | /api/bdt/dag | /api/telemetry/status
+    <div>SpaceScope Distributed Platform — Apache Spark & MongoDB Architecture</div>
+    <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-secondary);">
+      Endpoints: /api/missions | /api/bdt/benchmarks | /api/bdt/dag | /api/telemetry/status
     </div>
   </footer>
 
@@ -1361,17 +1298,29 @@
     let typeChartInstance = null;
     let bdtChartInstance = null;
 
-    // Global Chart.js dark defaults
+    // Palette for Situation Room Charts
+    const palette = {
+      steel: '#4f7396',
+      brass: '#c89553',
+      sage: '#4e9a75',
+      brick: '#aa4d4d',
+      slate: '#68798e',
+      amber: '#b87a3b'
+    };
+
+    // Chart.js Situation Room Defaults
     if (typeof Chart !== 'undefined') {
-      Chart.defaults.color = '#94a3b8';
-      Chart.defaults.font.family = "'Space Grotesk', sans-serif";
-      Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-      Chart.defaults.plugins.tooltip.borderColor = 'rgba(56, 189, 248, 0.3)';
+      Chart.defaults.color = '#8e9cae';
+      Chart.defaults.font.family = "'Anek Latin', -apple-system, sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.plugins.tooltip.backgroundColor = '#131922';
+      Chart.defaults.plugins.tooltip.borderColor = '#37465e';
       Chart.defaults.plugins.tooltip.borderWidth = 1;
-      Chart.defaults.plugins.tooltip.padding = 10;
+      Chart.defaults.plugins.tooltip.padding = 9;
+      Chart.defaults.plugins.tooltip.titleFont = { family: "'EB Garamond', serif", size: 14 };
     }
 
-    // Switch Tabs
+    // Tab Switching
     function switchTab(tabId) {
       activeTab = tabId;
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1390,22 +1339,21 @@
       }
     }
 
-    // Toast Message
+    // Toast Notification
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = 'toast';
-      toast.innerHTML = `<span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span> <span>${message}</span>`;
+      toast.innerText = message;
       container.appendChild(toast);
       setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
         toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-      }, 3500);
+      }, 3200);
     }
 
-    // Initialize application
+    // App Initialization
     document.addEventListener('DOMContentLoaded', () => {
       fetchTelemetryStatus();
       fetchSummary();
@@ -1421,12 +1369,12 @@
         const res = await fetch('/api/telemetry/status');
         if (res.ok) {
           const data = await res.json();
-          const count = data.metrics.total_records ? data.metrics.total_records.toLocaleString() : '4,324';
-          const partitions = data.metrics.spark_partitions || 4;
-          document.getElementById('system-status').innerText = `BDT ENGINE: ONLINE (${count} Records | ${partitions} Partitions)`;
+          const count = data.total_records ? data.total_records.toLocaleString() : '4,324';
+          const partitions = data.partitions || 4;
+          document.getElementById('system-status').innerText = `ENGINE READY (${count} Records | ${partitions} Partitions)`;
         }
       } catch (e) {
-        document.getElementById('system-status').innerText = 'BDT ENGINE: OFFLINE';
+        document.getElementById('system-status').innerText = 'ENGINE OFFLINE';
       }
     }
 
@@ -1459,15 +1407,15 @@
           data: {
             labels: years,
             datasets: [{
-              label: 'Launches',
+              label: 'Launch Attempts',
               data: counts,
-              borderColor: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.12)',
+              borderColor: palette.steel,
+              backgroundColor: 'rgba(79, 115, 150, 0.1)',
               fill: true,
-              tension: 0.35,
-              borderWidth: 2,
+              tension: 0.2,
+              borderWidth: 1.8,
               pointRadius: 1,
-              pointHoverRadius: 5
+              pointHoverRadius: 4
             }]
           },
           options: {
@@ -1475,8 +1423,8 @@
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-              x: { grid: { color: 'rgba(255, 255, 255, 0.04)' } },
-              y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, beginAtZero: true }
+              x: { grid: { color: 'rgba(255, 255, 255, 0.03)' } },
+              y: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, beginAtZero: true }
             }
           }
         });
@@ -1494,12 +1442,11 @@
           data: {
             labels: json.data.organizations,
             datasets: [{
-              label: 'Missions',
+              label: 'Recorded Launches',
               data: json.data.counts,
-              backgroundColor: 'rgba(99, 102, 241, 0.8)',
-              borderColor: '#6366f1',
-              borderWidth: 1,
-              borderRadius: 4
+              backgroundColor: palette.steel,
+              borderWidth: 0,
+              borderRadius: 2
             }]
           },
           options: {
@@ -1508,7 +1455,7 @@
             plugins: { legend: { display: false } },
             scales: {
               x: { grid: { display: false } },
-              y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, beginAtZero: true }
+              y: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, beginAtZero: true }
             }
           }
         });
@@ -1527,7 +1474,7 @@
             labels: json.data.statuses,
             datasets: [{
               data: json.data.counts,
-              backgroundColor: ['#10b981', '#f43f5e', '#f59e0b', '#a855f7'],
+              backgroundColor: [palette.sage, palette.brick, palette.brass, palette.slate],
               borderWidth: 0
             }]
           },
@@ -1535,9 +1482,9 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+              legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } }
             },
-            cutout: '65%'
+            cutout: '68%'
           }
         });
       } catch (e) { console.error(e); }
@@ -1555,8 +1502,8 @@
             labels: json.data.countries,
             datasets: [{
               data: json.data.counts,
-              backgroundColor: 'rgba(56, 189, 248, 0.8)',
-              borderRadius: 4
+              backgroundColor: palette.slate,
+              borderRadius: 2
             }]
           },
           options: {
@@ -1565,7 +1512,7 @@
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-              x: { grid: { color: 'rgba(255, 255, 255, 0.04)' } },
+              x: { grid: { color: 'rgba(255, 255, 255, 0.03)' } },
               y: { grid: { display: false } }
             }
           }
@@ -1585,25 +1532,25 @@
             labels: json.data.types,
             datasets: [{
               data: json.data.counts,
-              backgroundColor: ['#38bdf8', '#818cf8', '#c084fc', '#f472b6', '#fbbf24', '#34d399'],
+              backgroundColor: [palette.steel, palette.brass, palette.sage, palette.slate, palette.amber, '#7b688e'],
               borderWidth: 0
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 12 } } }
+            plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 10 } } }
           }
         });
       } catch (e) { console.error(e); }
     }
 
-    // CRUD Operations
+    // CRUD Functions
     async function fetchCrudMissions() {
       const q = document.getElementById('crud-search').value.trim();
       const statusFilter = document.getElementById('crud-status-filter').value;
       const tbody = document.getElementById('crud-table-body');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-dim); padding: 1.5rem;">Loading missions...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">Updating records...</td></tr>';
 
       try {
         const queryParams = new URLSearchParams({
@@ -1620,7 +1567,7 @@
         }
 
         if (missions.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-dim); padding: 2rem;">No matching missions found.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No matching records found.</td></tr>';
           document.getElementById('crud-page-info').innerText = 'Page 0 of 0';
           document.getElementById('crud-btn-prev').disabled = true;
           document.getElementById('crud-btn-next').disabled = true;
@@ -1633,16 +1580,16 @@
           return `
             <tr>
               <td><span class="id-badge">#${m.id || '--'}</span></td>
-              <td style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">${m.year || '--'}</td>
-              <td style="font-size: 0.76rem; color: var(--text-muted);">${m.launch_date || '--'}</td>
-              <td style="font-weight: 600; color: #fff;">${m.company || '--'}</td>
+              <td style="font-family: var(--font-mono);">${m.year || '--'}</td>
+              <td style="font-size: 0.76rem; color: var(--text-secondary);">${m.launch_date || '--'}</td>
+              <td style="font-weight: 500;">${m.company || '--'}</td>
               <td>${m.rocket || '--'}</td>
               <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.launch_site || ''}">${m.launch_site || '--'}</td>
               <td>${m.country || '--'}</td>
               <td><span class="badge-status ${badgeClass}">${status}</span></td>
               <td style="text-align: right; white-space: nowrap;">
-                <button class="btn btn-secondary btn-sm" onclick="openEditModal(${m.id})">✏️ Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="confirmDeleteMission(${m.id}, '${m.company || ''}', '${m.rocket || ''}')">🗑️</button>
+                <button class="btn btn-secondary btn-sm" onclick="openEditModal(${m.id})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmDeleteMission(${m.id}, '${m.company || ''}', '${m.rocket || ''}')">Delete</button>
               </td>
             </tr>
           `;
@@ -1654,7 +1601,7 @@
         document.getElementById('crud-btn-prev').disabled = (crudPage <= 1);
         document.getElementById('crud-btn-next').disabled = (crudPage >= totalPages);
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--accent-rose); padding: 1.5rem;">Failed to fetch missions: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--status-alert); padding: 1.5rem;">Failed to fetch missions: ${e.message}</td></tr>`;
       }
     }
 
@@ -1682,7 +1629,6 @@
       fetchCrudMissions();
     }
 
-    // Modal Handlers
     function openModal(id) {
       document.getElementById(id).classList.add('open');
     }
@@ -1707,7 +1653,7 @@
       const company = document.getElementById('create-company').value.trim();
       const rocket = document.getElementById('create-rocket').value.trim();
       if (!company || !rocket) {
-        alert('Organization and Rocket Vehicle are required!');
+        alert('Organization and Launch Vehicle are required.');
         return;
       }
 
@@ -1731,7 +1677,7 @@
         const data = await res.json();
         if (res.ok) {
           closeModal('modal-create');
-          showToast(`Mission #${data.data.id} created successfully!`, 'success');
+          showToast(`Mission #${data.data.id} recorded.`);
           fetchCrudMissions();
           fetchSummary();
           fetchTelemetryStatus();
@@ -1739,10 +1685,10 @@
           fetchOrgData();
           fetchOutcomeData();
         } else {
-          alert(data.error || 'Failed to create mission');
+          alert(data.error || 'Operation failed.');
         }
       } catch (e) {
-        alert('Network error: ' + e.message);
+        alert('Communication error: ' + e.message);
       }
     }
 
@@ -1751,7 +1697,7 @@
         const res = await fetch(`/api/missions/${missionId}`);
         const json = await res.json();
         if (!res.ok) {
-          showToast('Failed to fetch mission details', 'error');
+          showToast('Failed to retrieve record.');
           return;
         }
         const m = json.data;
@@ -1768,7 +1714,7 @@
         document.getElementById('edit-detail').value = m.detail || '';
         openModal('modal-edit');
       } catch (e) {
-        showToast('Error opening edit modal', 'error');
+        showToast('Error opening edit dialog.');
       }
     }
 
@@ -1795,40 +1741,37 @@
         const data = await res.json();
         if (res.ok) {
           closeModal('modal-edit');
-          showToast(`Mission #${id} updated successfully!`, 'success');
+          showToast(`Mission #${id} updated.`);
           fetchCrudMissions();
           fetchSummary();
           fetchYearlyData();
           fetchOrgData();
           fetchOutcomeData();
         } else {
-          alert(data.error || 'Failed to update mission');
+          alert(data.error || 'Update failed.');
         }
       } catch (e) {
-        alert('Network error: ' + e.message);
+        alert('Communication error: ' + e.message);
       }
     }
 
     async function confirmDeleteMission(id, company, rocket) {
-      if (!confirm(`Are you sure you want to delete Mission #${id} (${company} - ${rocket})?`)) {
+      if (!confirm(`Confirm deletion of Mission #${id} (${company} - ${rocket})?`)) {
         return;
       }
       try {
         const res = await fetch(`/api/missions/${id}`, { method: 'DELETE' });
-        const data = await res.json();
         if (res.ok) {
-          showToast(`Mission #${id} deleted`, 'info');
+          showToast(`Mission #${id} deleted.`);
           fetchCrudMissions();
           fetchSummary();
           fetchTelemetryStatus();
           fetchYearlyData();
           fetchOrgData();
           fetchOutcomeData();
-        } else {
-          alert(data.error || 'Failed to delete mission');
         }
       } catch (e) {
-        alert('Network error: ' + e.message);
+        alert('Communication error: ' + e.message);
       }
     }
 
@@ -1837,7 +1780,7 @@
       try {
         const res = await fetch('/api/missions/reset', { method: 'POST' });
         if (res.ok) {
-          showToast('Dataset reset to baseline records', 'success');
+          showToast('Dataset reset to baseline.');
           crudPage = 1;
           fetchCrudMissions();
           fetchSummary();
@@ -1847,14 +1790,14 @@
           fetchOutcomeData();
         }
       } catch (e) {
-        showToast('Reset failed', 'error');
+        showToast('Reset failed.');
       }
     }
 
     // Export CSV / JSON
     async function exportCSV() {
       try {
-        showToast('Generating CSV export...', 'info');
+        showToast('Generating CSV file...');
         const res = await fetch('/api/missions/list?limit=10000');
         const json = await res.json();
         const items = json.missions || [];
@@ -1872,15 +1815,15 @@
         a.href = url;
         a.download = `spacescope_missions_${Date.now()}.csv`;
         a.click();
-        showToast('CSV Export downloaded!', 'success');
+        showToast('CSV export complete.');
       } catch (e) {
-        showToast('Export failed', 'error');
+        showToast('Export failed.');
       }
     }
 
     async function exportJSON() {
       try {
-        showToast('Generating JSON export...', 'info');
+        showToast('Generating JSON file...');
         const res = await fetch('/api/missions/list?limit=10000');
         const json = await res.json();
         const blob = new Blob([JSON.stringify(json.missions || [], null, 2)], { type: 'application/json' });
@@ -1889,9 +1832,9 @@
         a.href = url;
         a.download = `spacescope_missions_${Date.now()}.json`;
         a.click();
-        showToast('JSON Export downloaded!', 'success');
+        showToast('JSON export complete.');
       } catch (e) {
-        showToast('Export failed', 'error');
+        showToast('Export failed.');
       }
     }
 
@@ -1903,11 +1846,11 @@
         const stage1x = json.metrics['1x'].stages;
         const stage5x = json.metrics['5x'].stages;
 
-        const labels = ['Data Cleaning', 'Date Parsing', 'Aggregations', 'Lakehouse Sync'];
-        const pandas1x = [stage1x.data_cleaning_pandas_ms, stage1x.date_standardization_pandas_ms, stage1x.distributed_aggregations_pandas_ms, stage1x.lakehouse_storage_sync_pandas_ms];
-        const pyspark1x = [stage1x.data_cleaning_pyspark_ms, stage1x.date_standardization_pyspark_ms, stage1x.distributed_aggregations_pyspark_ms, stage1x.lakehouse_storage_sync_pyspark_ms];
-        const pandas5x = [stage5x.data_cleaning_pandas_ms, stage5x.date_standardization_pandas_ms, stage5x.distributed_aggregations_pandas_ms, stage5x.lakehouse_storage_sync_pandas_ms];
-        const pyspark5x = [stage5x.data_cleaning_pyspark_ms, stage5x.date_standardization_pyspark_ms, stage5x.distributed_aggregations_pyspark_ms, stage5x.lakehouse_storage_sync_pyspark_ms];
+        const labels = ['Ingestion', 'Preprocessing', 'Aggregation', 'Storage Sync'];
+        const pandas1x = [stage1x[0].pandas_ms, stage1x[1].pandas_ms, stage1x[2].pandas_ms, stage1x[3].pandas_ms];
+        const pyspark1x = [stage1x[0].spark_ms, stage1x[1].spark_ms, stage1x[2].spark_ms, stage1x[3].spark_ms];
+        const pandas5x = [stage5x[0].pandas_ms, stage5x[1].pandas_ms, stage5x[2].pandas_ms, stage5x[3].pandas_ms];
+        const pyspark5x = [stage5x[0].spark_ms, stage5x[1].spark_ms, stage5x[2].spark_ms, stage5x[3].spark_ms];
 
         const ctx = document.getElementById('bdtBenchmarkChart').getContext('2d');
         if (bdtChartInstance) bdtChartInstance.destroy();
@@ -1916,23 +1859,23 @@
           data: {
             labels: labels,
             datasets: [
-              { label: 'Pandas (1x: 4.3k)', data: pandas1x, backgroundColor: 'rgba(56, 189, 248, 0.4)', borderColor: '#38bdf8', borderWidth: 1 },
-              { label: 'PySpark (1x: 4.3k)', data: pyspark1x, backgroundColor: 'rgba(99, 102, 241, 0.4)', borderColor: '#6366f1', borderWidth: 1 },
-              { label: 'Pandas (5x: 21.6k)', data: pandas5x, backgroundColor: 'rgba(244, 63, 94, 0.5)', borderColor: '#f43f5e', borderWidth: 1 },
-              { label: 'PySpark (5x: 21.6k)', data: pyspark5x, backgroundColor: 'rgba(16, 185, 129, 0.6)', borderColor: '#10b981', borderWidth: 1 }
+              { label: 'Pandas (1x: 4.3k records)', data: pandas1x, backgroundColor: 'rgba(79, 115, 150, 0.5)', borderColor: palette.steel, borderWidth: 1 },
+              { label: 'PySpark (1x: 4.3k records)', data: pyspark1x, backgroundColor: 'rgba(104, 121, 142, 0.4)', borderColor: palette.slate, borderWidth: 1 },
+              { label: 'Pandas (5x: 21.6k records)', data: pandas5x, backgroundColor: 'rgba(184, 122, 59, 0.5)', borderColor: palette.brass, borderWidth: 1 },
+              { label: 'PySpark (5x: 21.6k records)', data: pyspark5x, backgroundColor: 'rgba(61, 136, 100, 0.5)', borderColor: palette.sage, borderWidth: 1 }
             ]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'top', labels: { boxWidth: 12, padding: 15 } }
+              legend: { position: 'top', labels: { boxWidth: 10, padding: 12 } }
             },
             scales: {
               y: {
                 type: 'logarithmic',
                 title: { display: true, text: 'Execution Time (ms, log-scale)' },
-                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                grid: { color: 'rgba(255, 255, 255, 0.03)' }
               },
               x: { grid: { display: false } }
             }
@@ -1953,39 +1896,36 @@
           const terminal = document.getElementById('stream-terminal');
           const time = new Date().toISOString().split('T')[1].substring(0, 8);
           const line = document.createElement('div');
-          line.innerHTML = `[${time} UTC] [PARTITION ${data.telemetry.partition_id}] Ingested Mission #${ev.id}: ${ev.company} | ${ev.rocket} -> Success Rate: ${data.telemetry.new_success_rate}%`;
+          line.innerText = `[${time} UTC] [PARTITION ${data.telemetry.partition_id}] Ingested Mission #${ev.id}: ${ev.company} | ${ev.rocket} -> Success Rate: ${data.telemetry.new_success_rate}%`;
           terminal.prepend(line);
-          showToast(`Stream Launch Ingested: ${ev.company} ${ev.rocket}`, 'success');
+          showToast(`Stream ingested: ${ev.company} ${ev.rocket}`);
           fetchSummary();
           fetchTelemetryStatus();
           fetchYearlyData();
           fetchOutcomeData();
         }
       } catch (e) {
-        console.error('Stream launch simulation error:', e);
+        console.error('Stream simulation error:', e);
       }
     }
 
     function toggleStreamSimulator() {
       const btnText = document.getElementById('stream-btn-text');
-      const btnIcon = document.getElementById('stream-btn-icon');
       const badge = document.getElementById('stream-status-badge');
 
       if (streamInterval) {
         clearInterval(streamInterval);
         streamInterval = null;
         btnText.innerText = 'Start Telemetry Stream';
-        btnIcon.innerText = '▶';
         badge.innerText = 'Stream: Idle';
-        badge.style.color = 'var(--text-muted)';
-        showToast('Telemetry stream stopped', 'info');
+        badge.style.color = 'var(--text-secondary)';
+        showToast('Telemetry stream halted.');
       } else {
         streamInterval = setInterval(simulateStreamLaunch, 4000);
-        btnText.innerText = 'Stop Telemetry Stream';
-        btnIcon.innerText = '⏹';
-        badge.innerText = 'Stream: ACTIVE (15 msgs/min)';
-        badge.style.color = 'var(--accent-emerald)';
-        showToast('Real-time telemetry stream running', 'success');
+        btnText.innerText = 'Halt Telemetry Stream';
+        badge.innerText = 'Stream: Active (15 msgs/min)';
+        badge.style.color = '#72b392';
+        showToast('Telemetry stream started.');
         simulateStreamLaunch();
       }
     }
