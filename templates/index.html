@@ -1353,6 +1353,16 @@
       }, 3200);
     }
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     // App Initialization
     document.addEventListener('DOMContentLoaded', () => {
       fetchTelemetryStatus();
@@ -1362,6 +1372,7 @@
       fetchOutcomeData();
       fetchCountryData();
       fetchTypeData();
+      fetchCrudMissions();
     });
 
     async function fetchTelemetryStatus() {
@@ -1547,10 +1558,11 @@
 
     // CRUD Functions
     async function fetchCrudMissions() {
-      const q = document.getElementById('crud-search').value.trim();
-      const statusFilter = document.getElementById('crud-status-filter').value;
+      const q = (document.getElementById('crud-search')?.value || '').trim();
+      const statusFilter = document.getElementById('crud-status-filter')?.value || '';
       const tbody = document.getElementById('crud-table-body');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">Updating records...</td></tr>';
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">Synchronizing flight log records...</td></tr>';
 
       try {
         const queryParams = new URLSearchParams({
@@ -1558,17 +1570,20 @@
           limit: crudPageSize,
           q: q
         });
+        if (statusFilter) {
+          queryParams.set('status', statusFilter);
+        }
         const res = await fetch(`/api/missions/list?${queryParams.toString()}`);
         const data = await res.json();
 
-        let missions = data.missions || [];
-        if (statusFilter) {
-          missions = missions.filter(m => String(m.mission_status).toLowerCase().includes(statusFilter.toLowerCase()));
-        }
+        const missions = data.missions || data.data || [];
+        const total = (data.pagination && typeof data.pagination.total === 'number') 
+          ? data.pagination.total 
+          : (typeof data.total_missions === 'number' ? data.total_missions : (typeof data.total_records === 'number' ? data.total_records : missions.length));
 
-        if (missions.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No matching records found.</td></tr>';
-          document.getElementById('crud-page-info').innerText = 'Page 0 of 0';
+        if (!missions || missions.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No matching flight records found for current parameters.</td></tr>';
+          document.getElementById('crud-page-info').innerText = 'Showing 0 records';
           document.getElementById('crud-btn-prev').disabled = true;
           document.getElementById('crud-btn-next').disabled = true;
           return;
@@ -1577,31 +1592,38 @@
         tbody.innerHTML = missions.map(m => {
           const status = m.mission_status || 'Unknown';
           const badgeClass = status.includes('Success') ? 'badge-success' : status.includes('Fail') ? 'badge-failure' : 'badge-partial';
+          const safeCompany = escapeHtml(m.company || '--');
+          const safeRocket = escapeHtml(m.rocket || '--');
+          const safeSite = escapeHtml(m.launch_site || '--');
+          const safeCountry = escapeHtml(m.country || '--');
+          const safeYear = escapeHtml(m.year || '--');
+          const safeDate = escapeHtml(m.launch_date || '--');
+          const jsCompany = (m.company || '').replace(/'/g, "\\'");
+          const jsRocket = (m.rocket || '').replace(/'/g, "\\'");
           return `
             <tr>
               <td><span class="id-badge">#${m.id || '--'}</span></td>
-              <td style="font-family: var(--font-mono);">${m.year || '--'}</td>
-              <td style="font-size: 0.76rem; color: var(--text-secondary);">${m.launch_date || '--'}</td>
-              <td style="font-weight: 500;">${m.company || '--'}</td>
-              <td>${m.rocket || '--'}</td>
-              <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.launch_site || ''}">${m.launch_site || '--'}</td>
-              <td>${m.country || '--'}</td>
-              <td><span class="badge-status ${badgeClass}">${status}</span></td>
+              <td style="font-family: var(--font-mono);">${safeYear}</td>
+              <td style="font-size: 0.76rem; color: var(--text-secondary);">${safeDate}</td>
+              <td style="font-weight: 500;">${safeCompany}</td>
+              <td>${safeRocket}</td>
+              <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${safeSite}">${safeSite}</td>
+              <td>${safeCountry}</td>
+              <td><span class="badge-status ${badgeClass}">${escapeHtml(status)}</span></td>
               <td style="text-align: right; white-space: nowrap;">
                 <button class="btn btn-secondary btn-sm" onclick="openEditModal(${m.id})">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="confirmDeleteMission(${m.id}, '${m.company || ''}', '${m.rocket || ''}')">Delete</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmDeleteMission(${m.id}, '${jsCompany}', '${jsRocket}')">Delete</button>
               </td>
             </tr>
           `;
         }).join('');
 
-        const total = data.total_missions || 0;
         const totalPages = Math.max(1, Math.ceil(total / crudPageSize));
-        document.getElementById('crud-page-info').innerText = `Showing page ${crudPage} of ${totalPages} (${total.toLocaleString()} total)`;
+        document.getElementById('crud-page-info').innerText = `Showing page ${crudPage} of ${totalPages} (${total.toLocaleString()} records)`;
         document.getElementById('crud-btn-prev').disabled = (crudPage <= 1);
         document.getElementById('crud-btn-next').disabled = (crudPage >= totalPages);
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--status-alert); padding: 1.5rem;">Failed to fetch missions: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--status-alert); padding: 1.5rem;">Failed to fetch missions: ${escapeHtml(e.message)}</td></tr>`;
       }
     }
 
@@ -1797,36 +1819,21 @@
     // Export CSV / JSON
     async function exportCSV() {
       try {
-        showToast('Generating CSV file...');
-        const res = await fetch('/api/missions/list?limit=10000');
-        const json = await res.json();
-        const items = json.missions || [];
-        if (!items.length) return;
-
-        const keys = Object.keys(items[0]);
-        const csvRows = [keys.join(',')];
-        for (const item of items) {
-          const vals = keys.map(k => `"${String(item[k] ?? '').replace(/"/g, '""')}"`);
-          csvRows.push(vals.join(','));
-        }
-        const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `spacescope_missions_${Date.now()}.csv`;
-        a.click();
-        showToast('CSV export complete.');
+        showToast('Exporting complete mission dataset (CSV)...');
+        window.location.href = '/api/missions/export?format=csv';
+        setTimeout(() => showToast('CSV download dispatched.'), 1200);
       } catch (e) {
-        showToast('Export failed.');
+        showToast('CSV export error: ' + e.message);
       }
     }
 
     async function exportJSON() {
       try {
-        showToast('Generating JSON file...');
-        const res = await fetch('/api/missions/list?limit=10000');
+        showToast('Exporting complete mission dataset (JSON)...');
+        const res = await fetch('/api/missions/export?format=json');
         const json = await res.json();
-        const blob = new Blob([JSON.stringify(json.missions || [], null, 2)], { type: 'application/json' });
+        const items = json.missions || json.data || [];
+        const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -1834,7 +1841,7 @@
         a.click();
         showToast('JSON export complete.');
       } catch (e) {
-        showToast('Export failed.');
+        showToast('JSON export error: ' + e.message);
       }
     }
 

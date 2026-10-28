@@ -532,4 +532,59 @@ class TestCRUDAndBDTFeatures:
         assert 'bdtBenchmarkChart' in html
         assert 'five-vs-grid' in html
 
+    def test_missions_list_dual_envelope_and_status_filtering(self, client):
+        """GET /api/missions/list supports dual envelope ('data' and 'missions') and server-side status filtering"""
+        # Baseline envelope check
+        res = client.get('/api/missions/list?page=1&limit=15')
+        assert res.status_code == 200
+        json_data = res.get_json()
+        assert 'data' in json_data
+        assert 'missions' in json_data
+        assert 'total_missions' in json_data
+        assert isinstance(json_data['missions'], list)
+        assert len(json_data['missions']) == 15
+        assert json_data['total_missions'] > 4000
+
+        # Status filter check: Failure
+        res_fail = client.get('/api/missions/list?status=Failure&limit=25')
+        assert res_fail.status_code == 200
+        fail_data = res_fail.get_json()
+        assert len(fail_data['missions']) > 0
+        assert fail_data['total_missions'] > 0
+        for m in fail_data['missions']:
+            assert 'fail' in str(m['mission_status']).lower()
+
+        # Status filter check: Success
+        res_succ = client.get('/api/missions/list?status=Success&limit=25')
+        assert res_succ.status_code == 200
+        succ_data = res_succ.get_json()
+        assert len(succ_data['missions']) > 0
+        assert succ_data['total_missions'] > 3000
+        for m in succ_data['missions']:
+            assert 'success' in str(m['mission_status']).lower()
+
+    def test_missions_list_sorting_and_export(self, client):
+        """GET /api/missions/list supports sorting and /api/missions/export streams complete records"""
+        # Sorting by Year descending
+        res_sort = client.get('/api/missions/list?sort=year&order=desc&limit=10')
+        assert res_sort.status_code == 200
+        items = res_sort.get_json()['missions']
+        years = [m['year'] for m in items if m.get('year')]
+        assert years == sorted(years, reverse=True)
+
+        # Export CSV
+        res_csv = client.get('/api/missions/export?format=csv')
+        assert res_csv.status_code == 200
+        assert 'text/csv' in res_csv.content_type
+        assert 'id,company,rocket' in res_csv.get_data(as_text=True)
+
+        # Export JSON
+        res_json = client.get('/api/missions/export?format=json')
+        assert res_json.status_code == 200
+        export_data = res_json.get_json()
+        assert export_data['status'] == 'success'
+        assert export_data['total_records'] > 4000
+        assert len(export_data['missions']) > 4000
+
+
 

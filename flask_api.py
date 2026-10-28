@@ -255,32 +255,62 @@ class SpaceScopeAPI:
         
         @self.app.route('/api/missions/list', methods=['GET'])
         def missions_list():
-            """Get list of missions with pagination and search filter"""
+            """Get list of missions with server-side pagination, sorting, search, and status filters"""
             if self.missions_df is None or self.missions_df.empty:
                 return jsonify({'error': 'No data available'}), 404
             
             page = max(1, request.args.get('page', 1, type=int))
             limit = max(1, min(100, request.args.get('limit', 50, type=int)))
             search_query = (request.args.get('search') or request.args.get('q') or '').strip().lower()
+            status_filter = (request.args.get('status') or '').strip().lower()
+            company_filter = (request.args.get('company') or '').strip().lower()
+            country_filter = (request.args.get('country') or '').strip().lower()
+            year_filter = request.args.get('year', type=int)
+            sort_by = (request.args.get('sort') or 'id').strip().lower()
+            order = (request.args.get('order') or 'desc').strip().lower()
             
             cols = [c for c in ['id', 'company', 'rocket', 'launch_date', 'year', 'country', 'launch_site', 'mission_status', 'mission_type', 'detail'] if c in self.missions_df.columns]
             base_df = self.missions_df[cols] if cols else self.missions_df
 
+            filtered_df = base_df
+
+            # 1. Search Query filter across key text and identifier fields
             if search_query:
-                # Filter across company, rocket, country, launch_site, mission_type, detail, year, id
                 search_mask = (
-                    base_df['company'].astype(str).str.lower().str.contains(search_query, regex=False) |
-                    base_df['rocket'].astype(str).str.lower().str.contains(search_query, regex=False) |
-                    base_df['country'].astype(str).str.lower().str.contains(search_query, regex=False) |
-                    base_df['launch_site'].astype(str).str.lower().str.contains(search_query, regex=False) |
-                    base_df['mission_type'].astype(str).str.lower().str.contains(search_query, regex=False) |
-                    base_df['detail'].astype(str).str.lower().str.contains(search_query, regex=False) |
-                    base_df['year'].astype(str).str.contains(search_query, regex=False) |
-                    base_df['id'].astype(str).str.contains(search_query, regex=False)
+                    filtered_df['company'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    filtered_df['rocket'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    filtered_df['country'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    filtered_df['launch_site'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    filtered_df['mission_type'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    filtered_df['detail'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    filtered_df['year'].astype(str).str.contains(search_query, regex=False) |
+                    filtered_df['id'].astype(str).str.contains(search_query, regex=False)
                 )
-                filtered_df = base_df[search_mask]
-            else:
-                filtered_df = base_df
+                filtered_df = filtered_df[search_mask]
+
+            # 2. Flight Outcome / Status filter (Success, Failure, Partial)
+            if status_filter:
+                filtered_df = filtered_df[filtered_df['mission_status'].astype(str).str.lower().str.contains(status_filter, regex=False)]
+
+            # 3. Agency / Organization filter
+            if company_filter:
+                filtered_df = filtered_df[filtered_df['company'].astype(str).str.lower().str.contains(company_filter, regex=False)]
+
+            # 4. Country filter
+            if country_filter:
+                filtered_df = filtered_df[filtered_df['country'].astype(str).str.lower().str.contains(country_filter, regex=False)]
+
+            # 5. Year filter
+            if year_filter:
+                filtered_df = filtered_df[filtered_df['year'] == year_filter]
+
+            # 6. Server-side Sorting
+            if sort_by in filtered_df.columns:
+                ascending = (order == 'asc')
+                try:
+                    filtered_df = filtered_df.sort_values(by=sort_by, ascending=ascending)
+                except Exception:
+                    pass
 
             total_records = len(filtered_df)
             total_pages = max(1, (total_records + limit - 1) // limit)
@@ -299,9 +329,17 @@ class SpaceScopeAPI:
                         m['year'] = int(m['year'])
                     except Exception:
                         pass
+                for k, v in m.items():
+                    if pd.isna(v):
+                        m[k] = None
             
+            # Return both 'data' and 'missions', plus 'total_missions' and 'pagination' for universal compatibility
             return jsonify({
+                'status': 'success',
                 'data': missions,
+                'missions': missions,
+                'total_missions': total_records,
+                'total_records': total_records,
                 'pagination': {
                     'page': page,
                     'limit': limit,
@@ -309,6 +347,48 @@ class SpaceScopeAPI:
                     'total_pages': total_pages
                 }
             })
+
+        @self.app.route('/api/missions/export', methods=['GET'])
+        def export_missions():
+            """Export mission records in CSV or JSON format without pagination caps"""
+            if self.missions_df is None or self.missions_df.empty:
+                return jsonify({'error': 'No data available'}), 404
+            
+            fmt = request.args.get('format', 'json').lower()
+            cols = [c for c in ['id', 'company', 'rocket', 'launch_date', 'year', 'country', 'launch_site', 'mission_status', 'mission_type', 'detail'] if c in self.missions_df.columns]
+            export_df = self.missions_df[cols] if cols else self.missions_df
+
+            if fmt == 'csv':
+                from flask import Response
+                csv_data = export_df.to_csv(index=False)
+                return Response(
+                    csv_data,
+                    mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment;filename=spacescope_missions.csv"}
+                )
+            else:
+                records = export_df.to_dict('records')
+                for m in records:
+                    if 'id' in m and pd.notna(m['id']):
+                        try:
+                            m['id'] = int(m['id'])
+                        except Exception:
+                            pass
+                    if 'year' in m and pd.notna(m['year']):
+                        try:
+                            m['year'] = int(m['year'])
+                        except Exception:
+                            pass
+                    for k, v in m.items():
+                        if pd.isna(v):
+                            m[k] = None
+                return jsonify({
+                    'status': 'success',
+                    'total_records': len(records),
+                    'total_missions': len(records),
+                    'missions': records,
+                    'data': records
+                })
 
         @self.app.route('/api/missions', methods=['POST'])
         def create_mission():
