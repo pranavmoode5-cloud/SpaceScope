@@ -350,13 +350,63 @@ class SpaceScopeAPI:
 
         @self.app.route('/api/missions/export', methods=['GET'])
         def export_missions():
-            """Export mission records in CSV or JSON format without pagination caps"""
+            """Export mission records in CSV or JSON format with optional search and status filters"""
             if self.missions_df is None or self.missions_df.empty:
                 return jsonify({'error': 'No data available'}), 404
             
             fmt = request.args.get('format', 'json').lower()
+            search_query = (request.args.get('search') or request.args.get('q') or '').strip().lower()
+            status_filter = (request.args.get('status') or '').strip().lower()
+            company_filter = (request.args.get('company') or '').strip().lower()
+            country_filter = (request.args.get('country') or '').strip().lower()
+            year_filter = request.args.get('year', type=int)
+            sort_by = (request.args.get('sort') or 'id').strip().lower()
+            order = (request.args.get('order') or 'desc').strip().lower()
+
             cols = [c for c in ['id', 'company', 'rocket', 'launch_date', 'year', 'country', 'launch_site', 'mission_status', 'mission_type', 'detail'] if c in self.missions_df.columns]
-            export_df = self.missions_df[cols] if cols else self.missions_df
+            base_df = self.missions_df[cols] if cols else self.missions_df
+            export_df = base_df
+
+            # 1. Search Query filter across key text and identifier fields
+            if search_query:
+                search_mask = (
+                    export_df['company'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    export_df['rocket'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    export_df['country'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    export_df['launch_site'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    export_df['mission_type'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    export_df['detail'].astype(str).str.lower().str.contains(search_query, regex=False) |
+                    export_df['year'].astype(str).str.contains(search_query, regex=False) |
+                    export_df['id'].astype(str).str.contains(search_query, regex=False)
+                )
+                export_df = export_df[search_mask]
+
+            # 2. Flight Outcome / Status filter (Success, Failure, Partial)
+            if status_filter:
+                export_df = export_df[export_df['mission_status'].astype(str).str.lower().str.contains(status_filter, regex=False)]
+
+            # 3. Agency / Organization filter
+            if company_filter:
+                export_df = export_df[export_df['company'].astype(str).str.lower().str.contains(company_filter, regex=False)]
+
+            # 4. Country filter
+            if country_filter:
+                export_df = export_df[export_df['country'].astype(str).str.lower().str.contains(country_filter, regex=False)]
+
+            # 5. Year filter
+            if year_filter:
+                export_df = export_df[export_df['year'] == year_filter]
+
+            # 6. Server-side Sorting
+            if sort_by in export_df.columns:
+                ascending = (order == 'asc')
+                try:
+                    export_df = export_df.sort_values(by=sort_by, ascending=ascending)
+                except Exception:
+                    pass
+
+            is_filtered = bool(search_query or status_filter or company_filter or country_filter or year_filter)
+            filename_suffix = "searched" if is_filtered else "complete"
 
             if fmt == 'csv':
                 from flask import Response
@@ -364,7 +414,7 @@ class SpaceScopeAPI:
                 return Response(
                     csv_data,
                     mimetype="text/csv",
-                    headers={"Content-Disposition": "attachment;filename=spacescope_missions.csv"}
+                    headers={"Content-Disposition": f"attachment;filename=spacescope_missions_{filename_suffix}.csv"}
                 )
             else:
                 records = export_df.to_dict('records')
@@ -384,6 +434,7 @@ class SpaceScopeAPI:
                             m[k] = None
                 return jsonify({
                     'status': 'success',
+                    'filtered': is_filtered,
                     'total_records': len(records),
                     'total_missions': len(records),
                     'missions': records,

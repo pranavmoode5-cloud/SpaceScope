@@ -586,5 +586,23 @@ class TestCRUDAndBDTFeatures:
         assert export_data['total_records'] > 4000
         assert len(export_data['missions']) > 4000
 
+        # Export Searched / Filtered Data (CSV & JSON)
+        res_filtered_json = client.get('/api/missions/export?format=json&q=Falcon')
+        assert res_filtered_json.status_code == 200
+        filtered_json_data = res_filtered_json.get_json()
+        assert filtered_json_data['status'] == 'success'
+        assert filtered_json_data['filtered'] is True
+        assert 0 < filtered_json_data['total_records'] < 4000
+        for m in filtered_json_data['missions']:
+            assert any('falcon' in str(m.get(f, '')).lower() for f in ['rocket', 'detail', 'company'])
+
+        res_filtered_csv = client.get('/api/missions/export?format=csv&status=Failure')
+        assert res_filtered_csv.status_code == 200
+        assert 'spacescope_missions_searched.csv' in res_filtered_csv.headers.get('Content-Disposition', '')
+        csv_text = res_filtered_csv.get_data(as_text=True)
+        assert 'id,company,rocket' in csv_text
+        assert 'Failure' in csv_text
+
+
 
 

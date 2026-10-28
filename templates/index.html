@@ -1816,11 +1816,21 @@
       }
     }
 
-    // Export CSV / JSON
+    // Export CSV / JSON (incorporating active search & status filters)
     async function exportCSV() {
       try {
-        showToast('Exporting complete mission dataset (CSV)...');
-        window.location.href = '/api/missions/export?format=csv';
+        const q = (document.getElementById('crud-search')?.value || '').trim();
+        const statusFilter = document.getElementById('crud-status-filter')?.value || '';
+        const params = new URLSearchParams({ format: 'csv' });
+        if (q) params.set('q', q);
+        if (statusFilter) params.set('status', statusFilter);
+
+        const toastMsg = (q || statusFilter) 
+          ? 'Exporting searched mission dataset (CSV)...' 
+          : 'Exporting complete mission dataset (CSV)...';
+        showToast(toastMsg);
+
+        window.location.href = `/api/missions/export?${params.toString()}`;
         setTimeout(() => showToast('CSV download dispatched.'), 1200);
       } catch (e) {
         showToast('CSV export error: ' + e.message);
@@ -1829,17 +1839,28 @@
 
     async function exportJSON() {
       try {
-        showToast('Exporting complete mission dataset (JSON)...');
-        const res = await fetch('/api/missions/export?format=json');
+        const q = (document.getElementById('crud-search')?.value || '').trim();
+        const statusFilter = document.getElementById('crud-status-filter')?.value || '';
+        const params = new URLSearchParams({ format: 'json' });
+        if (q) params.set('q', q);
+        if (statusFilter) params.set('status', statusFilter);
+
+        const toastMsg = (q || statusFilter) 
+          ? 'Exporting searched mission dataset (JSON)...' 
+          : 'Exporting complete mission dataset (JSON)...';
+        showToast(toastMsg);
+
+        const res = await fetch(`/api/missions/export?${params.toString()}`);
         const json = await res.json();
         const items = json.missions || json.data || [];
         const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `spacescope_missions_${Date.now()}.json`;
+        const prefix = (q || statusFilter) ? 'spacescope_searched' : 'spacescope_missions';
+        a.download = `${prefix}_${Date.now()}.json`;
         a.click();
-        showToast('JSON export complete.');
+        showToast(`JSON export complete (${items.length.toLocaleString()} records).`);
       } catch (e) {
         showToast('JSON export error: ' + e.message);
       }
