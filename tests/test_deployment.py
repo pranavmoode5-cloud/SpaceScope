@@ -603,6 +603,85 @@ class TestCRUDAndBDTFeatures:
         assert 'id,company,rocket' in csv_text
         assert 'Failure' in csv_text
 
+    def test_ml_risk_predictor_training_and_partial_evaluation(self):
+        """FlightRiskPredictor trains cleanly on historical data and calculates hierarchical rates"""
+        from ml_predictor import FlightRiskPredictor
+        predictor = FlightRiskPredictor()
+        assert predictor.is_trained is True
+        assert predictor.total_records > 4000
+        assert 0.85 < predictor.global_success_rate < 0.95
+
+        # 0 fields: baseline
+        empty_pred = predictor.predict()
+        assert empty_pred['stage'] == 'baseline'
+        assert empty_pred['confidence'] == 'preliminary'
+        assert 85.0 <= empty_pred['success_rate'] <= 95.0
+        assert round(empty_pred['success_rate'] + empty_pred['failure_rate'], 1) == 100.0
+
+        # 1 field: refining
+        spacex_pred = predictor.predict(company='SpaceX')
+        assert spacex_pred['stage'] == 'refining'
+        assert spacex_pred['fields_analyzed'] == 1
+        assert spacex_pred['success_rate'] > 85.0
+
+        # Full fields: finalized
+        full_pred = predictor.predict(
+            company='SpaceX',
+            rocket='Falcon 9',
+            launch_date='2026-11-20',
+            country='USA',
+            launch_site='LC-39A',
+            mission_type='Commercial'
+        )
+        assert full_pred['stage'] == 'finalized'
+        assert full_pred['confidence'] == 'high'
+        assert full_pred['success_rate'] >= 90.0
+        assert len(full_pred['risk_factors']) > 0
+
+    def test_ml_predict_endpoint(self, client):
+        """POST /api/ml/predict returns HTTP 200 with dynamic success/failure probabilities"""
+        payload = {
+            'company': 'NASA',
+            'rocket': 'Atlas V',
+            'country': 'USA',
+            'launch_site': 'SLC-41',
+            'mission_type': 'Scientific'
+        }
+        res = client.post('/api/ml/predict', json=payload)
+        assert res.status_code == 200
+        data = res.get_json()
+        assert data['status'] == 'success'
+        assert 'success_rate' in data
+        assert 'failure_rate' in data
+        assert data['stage'] == 'finalized'
+        assert data['confidence'] == 'high'
+        assert round(data['success_rate'] + data['failure_rate'], 1) == 100.0
+
+    def test_create_mission_persists_predicted_success_rate(self, client):
+        """POST /api/missions persists predicted_success_rate as a first-class field"""
+        new_launch = {
+            'company': 'Rocket Lab',
+            'rocket': 'Electron',
+            'launch_date': '2026-12-15',
+            'country': 'New Zealand',
+            'launch_site': 'LC-1A, Mahia',
+            'mission_status': 'Success',
+            'mission_type': 'Commercial',
+            'detail': 'Dedicated Rideshare Mission',
+            'predicted_success_rate': 92.4
+        }
+        res = client.post('/api/missions', json=new_launch)
+        assert res.status_code == 201
+        created = res.get_json()['data']
+        assert 'predicted_success_rate' in created
+        assert created['predicted_success_rate'] == 92.4
+
+        # Read back by ID
+        res_get = client.get(f"/api/missions/{created['id']}")
+        assert res_get.status_code == 200
+        fetched = res_get.get_json()['data']
+        assert fetched.get('predicted_success_rate') == 92.4
+
 
 
 

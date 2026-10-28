@@ -13,6 +13,7 @@ import pandas as pd
 from flask import Flask, jsonify, request, render_template, render_template_string
 from flask_cors import CORS
 from data_ingestion import _extract_year_and_date
+from ml_predictor import FlightRiskPredictor
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class SpaceScopeAPI:
         self.data_filepath = data_filepath
         self.missions_df = None
         self.micro_batch_counter = 0
+        self.predictor = FlightRiskPredictor(self.data_filepath)
         
         # Load data
         self.load_data()
@@ -269,7 +271,7 @@ class SpaceScopeAPI:
             sort_by = (request.args.get('sort') or 'id').strip().lower()
             order = (request.args.get('order') or 'desc').strip().lower()
             
-            cols = [c for c in ['id', 'company', 'rocket', 'launch_date', 'year', 'country', 'launch_site', 'mission_status', 'mission_type', 'detail'] if c in self.missions_df.columns]
+            cols = [c for c in ['id', 'company', 'rocket', 'launch_date', 'year', 'country', 'launch_site', 'mission_status', 'mission_type', 'detail', 'predicted_success_rate'] if c in self.missions_df.columns]
             base_df = self.missions_df[cols] if cols else self.missions_df
 
             filtered_df = base_df
@@ -363,7 +365,7 @@ class SpaceScopeAPI:
             sort_by = (request.args.get('sort') or 'id').strip().lower()
             order = (request.args.get('order') or 'desc').strip().lower()
 
-            cols = [c for c in ['id', 'company', 'rocket', 'launch_date', 'year', 'country', 'launch_site', 'mission_status', 'mission_type', 'detail'] if c in self.missions_df.columns]
+            cols = [c for c in ['id', 'company', 'rocket', 'launch_date', 'year', 'country', 'launch_site', 'mission_status', 'mission_type', 'detail', 'predicted_success_rate'] if c in self.missions_df.columns]
             base_df = self.missions_df[cols] if cols else self.missions_df
             export_df = base_df
 
@@ -495,6 +497,23 @@ class SpaceScopeAPI:
             mission_type = str(data.get('mission_type') or 'Commercial').strip()
             detail = str(data.get('detail') or f"{rocket} mission").strip()
 
+            # ML Success Rate Estimation
+            raw_pred_rate = data.get('predicted_success_rate')
+            if raw_pred_rate is not None and str(raw_pred_rate).strip():
+                try:
+                    pred_rate = round(float(raw_pred_rate), 1)
+                except Exception:
+                    pred_rate = self.predictor.predict(
+                        company=company, rocket=rocket, launch_date=launch_date,
+                        country=country, launch_site=launch_site, mission_type=mission_type
+                    )['success_rate']
+            else:
+                pred_result = self.predictor.predict(
+                    company=company, rocket=rocket, launch_date=launch_date,
+                    country=country, launch_site=launch_site, mission_type=mission_type
+                )
+                pred_rate = pred_result['success_rate']
+
             new_record = {
                 'id': int(new_id),
                 'company': company,
@@ -505,7 +524,8 @@ class SpaceScopeAPI:
                 'launch_site': launch_site,
                 'mission_status': mission_status,
                 'mission_type': mission_type,
-                'detail': detail
+                'detail': detail,
+                'predicted_success_rate': float(pred_rate)
             }
 
             new_row_df = pd.DataFrame([new_record])
@@ -520,6 +540,24 @@ class SpaceScopeAPI:
                 'data': new_record,
                 'total_records': len(self.missions_df)
             }), 201
+
+        @self.app.route('/api/ml/predict', methods=['POST', 'GET'])
+        def predict_flight_risk():
+            """Evaluate ML flight success and failure risk probabilities based on provided attributes"""
+            if request.method == 'POST':
+                data = request.get_json(silent=True) or {}
+            else:
+                data = request.args.to_dict()
+
+            prediction = self.predictor.predict(
+                company=data.get('company'),
+                rocket=data.get('rocket'),
+                launch_date=data.get('launch_date'),
+                country=data.get('country'),
+                launch_site=data.get('launch_site'),
+                mission_type=data.get('mission_type')
+            )
+            return jsonify(prediction), 200
 
         @self.app.route('/api/missions/reset', methods=['POST', 'GET'])
         def reset_missions():

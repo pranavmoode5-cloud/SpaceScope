@@ -83,12 +83,23 @@ This document records all features, architectural transformations, bug fixes, an
   - BDT benchmarks, DAG plan, 5 V's matrix, and telemetry stream simulation
   - Dual envelope harmonization and server-side status filtering
   - Search-aware CSV and JSON exports
-- **Pass Rate**: 35 passed in ~3.5 seconds with zero warnings or failures.
+  - ML regression model training, hierarchical partial evaluations, and rate persistence
+- **Pass Rate**: 38 passed in ~5.0 seconds with zero warnings or failures.
 
 ---
 
-## 10. Summary of Recent Git Commits
+## 10. Machine Learning Flight Success Regression & Live HUD Predictor
+- **Empirical Bayesian Hierarchical Regression Engine**: Built [`ml_predictor.py`](file:///c:/Users/prana/OneDrive/SEM%20VII%20material/BDT_PROJECT/ml_predictor.py) trained on all 4,324 historical launches with smoothed target encoding across Agency, Vehicle, Spaceport, Country, Era, and Objective.
+- **Hierarchical Partial Evaluation**: Starts at historical base rate (89.7%), dynamically updating conditional probabilities as fields are entered one by one, outputting a finalized rate when all fields are complete.
+- **Situation Room Real-Time HUD Gauge**: Embedded in the **"Log New Launch"** modal with dynamic progress bar, live Success % / Failure % readout, status pill (`BASELINE PRIOR` $\to$ `REFINING` $\to$ `FINALIZED RATE`), and risk factor tags.
+- **First-Class Persistence**: Stored as `predicted_success_rate` in the mission record and displayed in the flight log table and Telemetry Inspector.
+- **Zero-Overhead Serverless Inference**: Sub-millisecond execution (<1ms) with zero heavy binary dependencies.
+
+---
+
+## 11. Summary of Recent Git Commits
 | Commit Hash | Commit Message | Highlights |
 | :--- | :--- | :--- |
 | `6e73d76` | `fix(crud): resolve mission operations empty table bug and add server-side filtering and export` | Dual envelope, server-side filters, Situation Room table, pre-fetch |
 | `c798310` | `feat(export): stream filtered search results in CSV and JSON exports` | Search-aware export endpoint, dynamic filenames, test assertions |
+| `02c437e` | `docs: add comprehensive progress.md and report.md architectural reference` | Complete project documentation & viva guide |

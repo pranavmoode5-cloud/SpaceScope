@@ -1171,23 +1171,23 @@
       <div class="modal-body">
         <div class="form-group">
           <label>Operating Organization *</label>
-          <input type="text" id="create-company" class="form-input" placeholder="e.g. SpaceX, NASA, ISRO" required>
+          <input type="text" id="create-company" class="form-input" placeholder="e.g. SpaceX, NASA, ISRO" oninput="triggerMlPredict()" required>
         </div>
         <div class="form-group">
           <label>Launch Vehicle *</label>
-          <input type="text" id="create-rocket" class="form-input" placeholder="e.g. Falcon 9, Ariane 5" required>
+          <input type="text" id="create-rocket" class="form-input" placeholder="e.g. Falcon 9, Ariane 5" oninput="triggerMlPredict()" required>
         </div>
         <div class="form-group">
           <label>Launch Date (YYYY-MM-DD)</label>
-          <input type="text" id="create-date" class="form-input" placeholder="2026-10-28">
+          <input type="text" id="create-date" class="form-input" placeholder="2026-10-28" oninput="triggerMlPredict()">
         </div>
         <div class="form-group">
           <label>Sovereign Country</label>
-          <input type="text" id="create-country" class="form-input" placeholder="e.g. USA, France, India">
+          <input type="text" id="create-country" class="form-input" placeholder="e.g. USA, France, India" oninput="triggerMlPredict()">
         </div>
         <div class="form-group-full">
           <label>Launch Site & Pad</label>
-          <input type="text" id="create-site" class="form-input" placeholder="e.g. Kennedy Space Center, LC-39A">
+          <input type="text" id="create-site" class="form-input" placeholder="e.g. Kennedy Space Center, LC-39A" oninput="triggerMlPredict()">
         </div>
         <div class="form-group">
           <label>Flight Outcome</label>
@@ -1199,11 +1199,48 @@
         </div>
         <div class="form-group">
           <label>Mission Objective</label>
-          <input type="text" id="create-type" class="form-input" placeholder="e.g. Communications, Scientific">
+          <input type="text" id="create-type" class="form-input" placeholder="e.g. Communications, Scientific" oninput="triggerMlPredict()" onchange="triggerMlPredict()">
         </div>
         <div class="form-group-full">
           <label>Payload & Flight Details</label>
           <input type="text" id="create-detail" class="form-input" placeholder="e.g. Orbital Constellation Deployment">
+        </div>
+
+        <!-- ML Flight Risk & Reliability HUD Gauge -->
+        <div id="ml-hud-container" style="margin-top: 1.15rem; padding: 0.9rem; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span id="ml-pulse-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #72b392;"></span>
+              <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--accent-brass);">ML Predictive Reliability HUD</span>
+            </div>
+            <span id="ml-stage-badge" style="font-family: var(--font-mono); font-size: 0.68rem; padding: 0.15rem 0.45rem; border-radius: 2px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-secondary);">BASELINE PRIOR</span>
+          </div>
+
+          <!-- Progress / Reliability Meter -->
+          <div style="height: 7px; width: 100%; background: #1c1515; border-radius: 4px; overflow: hidden; position: relative; margin-bottom: 0.6rem; border: 1px solid rgba(255,255,255,0.04);">
+            <div id="ml-meter-bar" style="height: 100%; width: 89.7%; background: linear-gradient(90deg, #3d8864, #72b392); transition: width 0.3s ease, background 0.3s ease;"></div>
+          </div>
+
+          <!-- Metrics Readout Row -->
+          <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.78rem;">
+            <div>
+              <span style="color: var(--text-secondary); font-size: 0.68rem; letter-spacing: 0.04em;">PREDICTED SUCCESS:</span>
+              <span id="ml-success-rate" style="font-family: var(--font-mono); font-weight: 700; color: #72b392; margin-left: 0.3rem; font-size: 0.95rem;">89.7%</span>
+            </div>
+            <div>
+              <span style="color: var(--text-secondary); font-size: 0.68rem; letter-spacing: 0.04em;">FAILURE RISK:</span>
+              <span id="ml-failure-rate" style="font-family: var(--font-mono); font-weight: 700; color: #d17575; margin-left: 0.3rem;">10.3%</span>
+            </div>
+            <div>
+              <span id="ml-risk-level" class="badge-status badge-success" style="font-size: 0.68rem;">Low Risk</span>
+            </div>
+          </div>
+
+          <!-- Top Risk Factors / Notes -->
+          <div id="ml-factors-box" style="margin-top: 0.5rem; font-size: 0.69rem; color: var(--text-secondary); border-top: 1px dashed var(--border-subtle); padding-top: 0.45rem; line-height: 1.4;">
+            <span style="color: var(--accent-brass); font-weight: 500;">Influencing Factors:</span>
+            <span id="ml-factors-text">Awaiting input parameters to compute conditional flight reliability.</span>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1609,7 +1646,10 @@
               <td>${safeRocket}</td>
               <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${safeSite}">${safeSite}</td>
               <td>${safeCountry}</td>
-              <td><span class="badge-status ${badgeClass}">${escapeHtml(status)}</span></td>
+              <td>
+                <span class="badge-status ${badgeClass}">${escapeHtml(status)}</span>
+                ${m.predicted_success_rate ? `<span class="id-badge" title="ML Reliability Score: ${m.predicted_success_rate}% Success" style="margin-left: 0.35rem; color: #72b392; border-color: rgba(61,136,100,0.3);">ML ${m.predicted_success_rate}%</span>` : ''}
+              </td>
               <td style="text-align: right; white-space: nowrap;">
                 <button class="btn btn-secondary btn-sm" onclick="openEditModal(${m.id})">Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="confirmDeleteMission(${m.id}, '${jsCompany}', '${jsRocket}')">Delete</button>
@@ -1659,6 +1699,80 @@
       document.getElementById(id).classList.remove('open');
     }
 
+    let mlDebounceTimer = null;
+    let currentPredictedSuccessRate = 89.7;
+
+    function triggerMlPredict() {
+      clearTimeout(mlDebounceTimer);
+      mlDebounceTimer = setTimeout(async () => {
+        const company = document.getElementById('create-company')?.value.trim() || '';
+        const rocket = document.getElementById('create-rocket')?.value.trim() || '';
+        const launch_date = document.getElementById('create-date')?.value.trim() || '';
+        const country = document.getElementById('create-country')?.value.trim() || '';
+        const launch_site = document.getElementById('create-site')?.value.trim() || '';
+        const mission_type = document.getElementById('create-type')?.value.trim() || '';
+
+        try {
+          const res = await fetch('/api/ml/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ company, rocket, launch_date, country, launch_site, mission_type })
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          currentPredictedSuccessRate = data.success_rate;
+
+          const meter = document.getElementById('ml-meter-bar');
+          const succRateEl = document.getElementById('ml-success-rate');
+          const failRateEl = document.getElementById('ml-failure-rate');
+          const stageBadge = document.getElementById('ml-stage-badge');
+          const riskLevelEl = document.getElementById('ml-risk-level');
+          const factorsEl = document.getElementById('ml-factors-text');
+
+          if (meter) {
+            meter.style.width = `${data.success_rate}%`;
+            if (data.success_rate >= 93.0) {
+              meter.style.background = 'linear-gradient(90deg, #3d8864, #72b392)';
+            } else if (data.success_rate >= 87.0) {
+              meter.style.background = 'linear-gradient(90deg, #b87a3b, #d4a373)';
+            } else {
+              meter.style.background = 'linear-gradient(90deg, #9e4343, #d17575)';
+            }
+          }
+
+          if (succRateEl) succRateEl.innerText = `${data.success_rate}%`;
+          if (failRateEl) failRateEl.innerText = `${data.failure_rate}%`;
+
+          if (stageBadge) {
+            if (data.stage === 'finalized') {
+              stageBadge.innerText = 'FINALIZED RATE';
+              stageBadge.style.color = '#72b392';
+              stageBadge.style.borderColor = 'rgba(61, 136, 100, 0.4)';
+            } else if (data.stage === 'refining') {
+              stageBadge.innerText = `REFINING (${data.fields_analyzed}/${data.total_fields})`;
+              stageBadge.style.color = '#d4a373';
+              stageBadge.style.borderColor = 'rgba(212, 163, 115, 0.4)';
+            } else {
+              stageBadge.innerText = 'BASELINE PRIOR';
+              stageBadge.style.color = 'var(--text-secondary)';
+              stageBadge.style.borderColor = 'var(--border-subtle)';
+            }
+          }
+
+          if (riskLevelEl) {
+            riskLevelEl.innerText = data.risk_level;
+            riskLevelEl.className = `badge-status ${data.success_rate >= 93.0 ? 'badge-success' : (data.success_rate >= 87.0 ? 'badge-partial' : 'badge-failure')}`;
+          }
+
+          if (factorsEl) {
+            factorsEl.innerText = data.risk_factors && data.risk_factors.length ? data.risk_factors.join(' • ') : 'Global historical baseline applied.';
+          }
+        } catch (e) {
+          console.warn('ML prediction offline:', e);
+        }
+      }, 120);
+    }
+
     function openCreateModal() {
       document.getElementById('create-company').value = '';
       document.getElementById('create-rocket').value = '';
@@ -1669,6 +1783,7 @@
       document.getElementById('create-type').value = 'Commercial';
       document.getElementById('create-detail').value = '';
       openModal('modal-create');
+      triggerMlPredict();
     }
 
     async function submitCreateMission() {
@@ -1687,7 +1802,8 @@
         launch_site: document.getElementById('create-site').value.trim(),
         mission_status: document.getElementById('create-status').value,
         mission_type: document.getElementById('create-type').value.trim(),
-        detail: document.getElementById('create-detail').value.trim()
+        detail: document.getElementById('create-detail').value.trim(),
+        predicted_success_rate: currentPredictedSuccessRate
       };
 
       try {

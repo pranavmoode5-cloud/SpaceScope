@@ -88,6 +88,7 @@ This section details every file in the repository, explaining its exact responsi
 ├── flask_api.py                     # Central Flask REST API and query routing engine
 ├── hf_mongo_loader.py               # HuggingFace & MongoDB cloud dataset synchronization
 ├── main_application.py              # CLI launcher and orchestrator for local pipelines
+├── ml_predictor.py                  # ML Flight Success Regression & Risk Engine
 ├── mongodb_storage.py               # MongoDB document storage driver and aggregation queries
 ├── progress.md                      # Changelog & milestones tracking since new repository
 ├── pyspark_processing.py            # Apache Spark distributed processing and DAG operations
@@ -157,21 +158,29 @@ This section details every file in the repository, explaining its exact responsi
 - **Importance**: Demonstrates NoSQL document-oriented lakehouse architecture for semi-structured aerospace logs.
 
 #### 7. `tests/test_deployment.py` (Automated Test Suite)
-- **Role**: Comprehensive pytest test suite consisting of **35 automated unit and integration tests**.
+- **Role**: Comprehensive pytest test suite consisting of **38 automated unit and integration tests**.
 - **Test Categories**:
   - `TestDeploymentConfiguration`: Serverless config, WSGI initialization, dependency hygiene.
   - `TestDataIngestionAndReliability`: Date extraction variations, CSV parsing, fallback behavior.
   - `TestWebAPIEndpoints`: Root HTML serving, REST endpoints, analytics responses, HTTP 404/405 validation.
   - `TestEdgeCasesAndBoundaries`: Pagination boundary clamping, search filtering, negative query limits, static asset delivery.
-  - `TestCRUDAndBDTFeatures`: Full CRUD lifecycle (POST, GET, PUT, DELETE, RESET), Table VII benchmarks, DAG stages, 5 V's matrix, telemetry streaming, dual envelope verification, and search-aware exports.
+  - `TestCRUDAndBDTFeatures`: Full CRUD lifecycle (POST, GET, PUT, DELETE, RESET), Table VII benchmarks, DAG stages, 5 V's matrix, telemetry streaming, dual envelope verification, search-aware exports, and ML regression risk prediction.
 - **Importance**: Ensures 100% regression-free code changes and proves production readiness to evaluators.
 
-#### 8. `requirements.txt` vs `requirements-batch.txt` (Dependency Segregation)
+#### 8. `ml_predictor.py` (Machine Learning Flight Risk & Regression Engine)
+- **Role**: Dedicated probabilistic regression engine trained on all 4,324 historical orbital missions.
+- **Key Features**:
+  - Computes empirical Bayesian m-estimate smoothed probabilities across operating agency, vehicle configuration, spaceport facility, country, era, and mission profile.
+  - Hierarchical partial input marginalization calculating real-time probabilities as keystrokes arrive.
+  - Sub-millisecond execution (<1ms) with zero serverless cold-start penalties.
+- **Importance**: Transforms static historical flight logs into an active predictive intelligence system for orbital mission planning.
+
+#### 9. `requirements.txt` vs `requirements-batch.txt` (Dependency Segregation)
 - **`requirements.txt`**: Minimalist serverless specification containing only `Flask`, `pandas`, `gunicorn`, and `pytest`. Enables fast Vercel builds under 30 seconds.
 - **`requirements-batch.txt`**: Complete big-data specification containing `pyspark`, `pymongo`, `findspark`, `matplotlib`, and `seaborn` for local cluster execution.
 - **Importance**: Resolves the classic Big Data dilemma where web servers crash attempting to initialize local Spark/Hadoop runtimes in serverless environments.
 
-#### 9. `progress.md` & `QUICKSTART.md` (Operational Documentation)
+#### 10. `progress.md` & `QUICKSTART.md` (Operational Documentation)
 - **`progress.md`**: Chronological record of architectural transformations and features delivered since repository initialization.
 - **`QUICKSTART.md`**: Step-by-step developer guide for running the serverless web app, running pytest suites, and running local PySpark batch pipelines.
 - **Importance**: Provides clear execution instructions for evaluators and grading committees.
@@ -246,6 +255,14 @@ This section details every file in the repository, explaining its exact responsi
   - **Accents**: Warm tactical brass (`#d4a373`) and gold (`#c89d5c`).
   - **Typography**: Classic serif headings (`EB Garamond` / `Times New Roman`) for authority; clean sans-serif (`Anek Latin`) for controls; monospace (`JetBrains Mono`) for IDs and timestamps.
 
+### Feature 9: Machine Learning Flight Success Regression & Live HUD Predictor
+- **Purpose**: Real-time probabilistic flight risk estimation and reliability modeling directly within the flight logging workflow.
+- **Capabilities**:
+  - **Live Dynamic Evaluation**: As the operator types Agency, Vehicle, Date, Country, Site, and Objective in the "Log New Launch" modal, `/api/ml/predict` evaluates conditional probabilities in sub-milliseconds.
+  - **Situation Room HUD Gauge**: Real-time animated progress meter displaying live Success % (green) vs Failure % (crimson), risk tier classification (`Low Risk`, `Moderate Risk`, `Elevated Risk`), and dynamic status stage (`BASELINE PRIOR` $\to$ `REFINING` $\to$ `FINALIZED RATE`).
+  - **Risk Factor Attribution**: Identifies primary influencing factors (e.g. operator volume, pad flight certification, contemporary era gain).
+  - **First-Class Persistence**: Automatically stores `predicted_success_rate` in the database record upon submission, surfacing in the flight table and Telemetry Inspector.
+
 ---
 
 ## 5. Data Pipeline & Lakehouse Specifications
@@ -311,8 +328,11 @@ tests/test_deployment.py::TestCRUDAndBDTFeatures::test_reset_dataset_endpoint PA
 tests/test_deployment.py::TestCRUDAndBDTFeatures::test_frontend_workspace_navigation_and_crud PASSED
 tests/test_deployment.py::TestCRUDAndBDTFeatures::test_missions_list_dual_envelope_and_status_filtering PASSED
 tests/test_deployment.py::TestCRUDAndBDTFeatures::test_missions_list_sorting_and_export PASSED
+tests/test_deployment.py::TestCRUDAndBDTFeatures::test_ml_risk_predictor_training_and_partial_evaluation PASSED
+tests/test_deployment.py::TestCRUDAndBDTFeatures::test_ml_predict_endpoint PASSED
+tests/test_deployment.py::TestCRUDAndBDTFeatures::test_create_mission_persists_predicted_success_rate PASSED
 
-============================= 35 passed in 3.46s ==============================
+============================= 38 passed in 5.03s ==============================
 ```
 
 ---
