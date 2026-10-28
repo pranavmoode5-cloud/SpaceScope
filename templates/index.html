@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpaceScope | Big Data Analytics of Global Space Missions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="/static/js/chart.umd.min.js"></script>
+  <script>
+    if (typeof Chart === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>');
+    }
+  </script>
+  <style>
+    :root {
+      --bg-primary: #060913;
+      --bg-secondary: #0d1322;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(22, 34, 61, 0.85);
+      --border-color: rgba(56, 189, 248, 0.15);
+      --border-focus: rgba(56, 189, 248, 0.5);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --glow-cyan: rgba(56, 189, 248, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.12), transparent),
+        radial-gradient(circle at 10% 40%, rgba(168, 85, 247, 0.06), transparent),
+        radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.05), transparent);
+      color: var(--text-main);
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 4rem;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      background: rgba(6, 9, 19, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      box-shadow: 0 0 20px var(--glow-cyan);
+    }
+
+    .brand-text h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-emerald);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .nav-btn:hover {
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
+      background: var(--bg-card-hover);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .kpi-card:hover::before {
+      opacity: 1;
+    }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.03em;
+    }
+
+    .kpi-subtext {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-card.col-12 { grid-column: span 12; }
+    .chart-card.col-8 { grid-column: span 8; }
+    .chart-card.col-6 { grid-column: span 6; }
+    .chart-card.col-4 { grid-column: span 4; }
+
+    @media (max-width: 1024px) {
+      .chart-card.col-8, .chart-card.col-4, .chart-card.col-6 {
+        grid-column: span 12;
+      }
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .chart-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chart-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .chart-body {
+      position: relative;
+      flex: 1;
+      min-height: 280px;
+    }
+
+    /* Table Section */
+    .table-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .search-input {
+      background: rgba(2, 6, 23, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      width: 320px;
+      max-width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(2, 6, 23, 0.5);
+      color: var(--text-muted);
+      font-weight: 500;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.07);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(56, 189, 248, 0.04);
+    }
+
+    .badge-status {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-failure {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-partial {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .pagination-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .page-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    footer {
+      max-width: 1400px;
+      margin: 3rem auto 0;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .api-badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .api-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      border: 1px solid rgba(56, 189, 248, 0.1);
+    }
+
+    .api-badge:hover {
+      border-color: var(--accent-cyan);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">🚀</div>
+        <div class="brand-text">
+          <h1>SpaceScope</h1>
+          <p>BIG DATA ANALYTICS // GLOBAL SPACE MISSIONS</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="status-pill">
+          <div class="status-dot"></div>
+          <span id="system-status">API: CONNECTED</span>
+        </div>
+        <div class="nav-links">
+          <a href="/api/health" class="nav-btn" target="_blank">Health</a>
+          <a href="/api/missions/summary" class="nav-btn" target="_blank">Summary JSON</a>
+          <a href="/api/analytics/dashboard" class="nav-btn" target="_blank">Analytics JSON</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- KPI Overview -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Missions <span>🌐</span></div>
+        <div class="kpi-value" id="kpi-missions">--</div>
+        <div class="kpi-subtext" id="kpi-years">Era: 1957 - 2020</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Mission Success Rate <span>🎯</span></div>
+        <div class="kpi-value" id="kpi-success">--%</div>
+        <div class="kpi-subtext">Historical orbital launches</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Space Organizations <span>🏛️</span></div>
+        <div class="kpi-value" id="kpi-orgs">--</div>
+        <div class="kpi-subtext">Global agencies & companies</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Rocket Classes <span>🚀</span></div>
+        <div class="kpi-value" id="kpi-rockets">--</div>
+        <div class="kpi-subtext">Distinct launch vehicles</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Spacefaring Nations <span>🌍</span></div>
+        <div class="kpi-value" id="kpi-countries">--</div>
+        <div class="kpi-subtext">Active launch territories</div>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+      <!-- Yearly Cadence -->
+      <div class="chart-card col-12">
+        <div class="chart-header">
+          <div class="chart-title">Historical Launch Cadence Over Time</div>
+          <span class="chart-badge">1957 - 2020</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="yearlyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Top Organizations -->
+      <div class="chart-card col-8">
+        <div class="chart-header">
+          <div class="chart-title">Missions by Top Space Organizations</div>
+          <span class="chart-badge">Leaderboard</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="orgChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Outcome Distribution -->
+      <div class="chart-card col-4">
+        <div class="chart-header">
+          <div class="chart-title">Mission Outcomes</div>
+          <span class="chart-badge">Reliability</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="outcomeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Country Distribution -->
+      <div class="chart-card col-6">
+        <div class="chart-header">
+          <div class="chart-title">Launches by Nation / Territory</div>
+          <span class="chart-badge">Geographic</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="countryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Mission Profiles -->
+      <div class="chart-card col-6">
+        <div class="chart-header">
+          <div class="chart-title">Mission Type & Payload Profile</div>
+          <span class="chart-badge">Categorization</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="typeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missions Data Table Explorer -->
+    <div class="table-section">
+      <div class="table-controls">
+        <div class="chart-title">Flight Log Explorer</div>
+        <input type="text" id="table-search" class="search-input" placeholder="Filter by organization, rocket, or detail...">
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Date</th>
+              <th>Organization</th>
+              <th>Vehicle / Rocket</th>
+              <th>Country</th>
+              <th>Launch Site</th>
+              <th>Profile</th>
+              <th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody id="missions-table-body">
+            <tr><td colspan="8" style="text-align: center; color: var(--text-dim); padding: 2rem;">Telemetry syncing...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span id="page-info">Showing page 1 of --</span>
+        <div class="pagination-btns">
+          <button id="btn-prev" class="page-btn" disabled>← Previous</button>
+          <button id="btn-next" class="page-btn">Next →</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>SpaceScope Serverless Platform // Ready for Continuous Deployment on Vercel</div>
+    <div class="api-badge-list">
+      <a href="/api/health" class="api-badge">GET /api/health</a>
+      <a href="/api/missions/summary" class="api-badge">GET /api/missions/summary</a>
+      <a href="/api/missions/by-year" class="api-badge">GET /api/missions/by-year</a>
+      <a href="/api/missions/by-organization" class="api-badge">GET /api/missions/by-organization</a>
+      <a href="/api/missions/by-rocket" class="api-badge">GET /api/missions/by-rocket</a>
+      <a href="/api/missions/by-type" class="api-badge">GET /api/missions/by-type</a>
+      <a href="/api/missions/by-country" class="api-badge">GET /api/missions/by-country</a>
+      <a href="/api/missions/outcome" class="api-badge">GET /api/missions/outcome</a>
+      <a href="/api/missions/list" class="api-badge">GET /api/missions/list</a>
+    </div>
+  </footer>
+
+  <script>
+    // State
+    let currentPage = 1;
+    const pageSize = 15;
+    let totalMissions = 0;
+    let allMissionsCache = [];
+
+    // Global Chart.js dark defaults (safely guarded)
+    if (typeof Chart !== 'undefined') {
+      Chart.defaults.color = '#94a3b8';
+      Chart.defaults.font.family = "'Space Grotesk', sans-serif";
+      Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+      Chart.defaults.plugins.tooltip.borderColor = 'rgba(56, 189, 248, 0.3)';
+      Chart.defaults.plugins.tooltip.borderWidth = 1;
+      Chart.defaults.plugins.tooltip.padding = 10;
+    }
+
+    // Load initial data
+    document.addEventListener('DOMContentLoaded', () => {
+      checkHealth();
+      fetchSummary();
+      fetchYearlyData();
+      fetchOrgData();
+      fetchOutcomeData();
+      fetchCountryData();
+      fetchTypeData();
+      fetchMissions(1);
+    });
+
+    async function checkHealth() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const data = await res.json();
+          const count = data.records_loaded ? data.records_loaded.toLocaleString() : '4,324';
+          document.getElementById('system-status').innerText = `API: ONLINE (${count} records)`;
+        } else {
+          document.getElementById('system-status').innerText = 'API: DEGRADED';
+        }
+      } catch (e) {
+        document.getElementById('system-status').innerText = 'API: OFFLINE';
+        const dot = document.querySelector('.status-dot');
+        if (dot) dot.style.background = 'var(--accent-rose)';
+      }
+    }
+
+    async function fetchSummary() {
+      try {
+        const res = await fetch('/api/missions/summary');
+        const data = await res.json();
+        document.getElementById('kpi-missions').innerText = (data.total_missions || 0).toLocaleString();
+        document.getElementById('kpi-success').innerText = `${Number(data.success_rate || 0).toFixed(1)}%`;
+        document.getElementById('kpi-orgs').innerText = (data.unique_organizations || 0).toLocaleString();
+        document.getElementById('kpi-rockets').innerText = (data.unique_rockets || 0).toLocaleString();
+        document.getElementById('kpi-countries').innerText = (data.unique_countries || 0).toLocaleString();
+        if (data.year_range && data.year_range.min && data.year_range.max) {
+          document.getElementById('kpi-years').innerText = `Era: ${data.year_range.min} - ${data.year_range.max}`;
+        }
+        totalMissions = data.total_missions || 0;
+      } catch (e) {
+        console.error('Failed to load summary:', e);
+      }
+    }
+
+    async function fetchYearlyData() {
+      try {
+        const res = await fetch('/api/missions/by-year');
+        const json = await res.json();
+        const years = json.data.years;
+        const counts = json.data.counts;
+
+        const ctx = document.getElementById('yearlyChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+        gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
+        gradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: years,
+            datasets: [{
+              label: 'Missions Launched',
+              data: counts,
+              borderColor: '#38bdf8',
+              backgroundColor: gradient,
+              borderWidth: 2,
+              fill: true,
+              tension: 0.25,
+              pointRadius: 2,
+              pointHoverRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+              y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, beginAtZero: true }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load yearly data:', e);
+      }
+    }
+
+    async function fetchOrgData() {
+      try {
+        const res = await fetch('/api/missions/by-organization?limit=8');
+        const json = await res.json();
+        const orgs = json.data.organizations;
+        const counts = json.data.counts;
+
+        new Chart(document.getElementById('orgChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: orgs,
+            datasets: [{
+              label: 'Missions',
+              data: counts,
+              backgroundColor: 'rgba(99, 102, 241, 0.8)',
+              borderColor: '#6366f1',
+              borderWidth: 1,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+              y: { grid: { display: false } }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load org data:', e);
+      }
+    }
+
+    async function fetchOutcomeData() {
+      try {
+        const res = await fetch('/api/missions/outcome');
+        const json = await res.json();
+        const statuses = json.data.statuses;
+        const counts = json.data.counts;
+
+        const colors = statuses.map(s => {
+          if (s.toLowerCase().includes('success')) return '#10b981';
+          if (s.toLowerCase().includes('partial')) return '#f59e0b';
+          return '#f43f5e';
+        });
+
+        new Chart(document.getElementById('outcomeChart').getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: statuses,
+            datasets: [{
+              data: counts,
+              backgroundColor: colors,
+              borderColor: '#0f172a',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+            },
+            cutout: '65%'
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load outcome data:', e);
+      }
+    }
+
+    async function fetchCountryData() {
+      try {
+        const res = await fetch('/api/missions/by-country?limit=7');
+        const json = await res.json();
+        const countries = json.data.countries;
+        const counts = json.data.counts;
+
+        new Chart(document.getElementById('countryChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: countries,
+            datasets: [{
+              label: 'Launches',
+              data: counts,
+              backgroundColor: 'rgba(56, 189, 248, 0.75)',
+              borderColor: '#38bdf8',
+              borderWidth: 1,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { grid: { display: false } },
+              y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, beginAtZero: true }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load country data:', e);
+      }
+    }
+
+    async function fetchTypeData() {
+      try {
+        const res = await fetch('/api/missions/by-type');
+        const json = await res.json();
+        const types = json.data.types;
+        const counts = json.data.counts;
+
+        new Chart(document.getElementById('typeChart').getContext('2d'), {
+          type: 'polarArea',
+          data: {
+            labels: types,
+            datasets: [{
+              data: counts,
+              backgroundColor: [
+                'rgba(56, 189, 248, 0.65)',
+                'rgba(99, 102, 241, 0.65)',
+                'rgba(16, 185, 129, 0.65)',
+                'rgba(245, 158, 11, 0.65)',
+                'rgba(168, 85, 247, 0.65)',
+                'rgba(244, 63, 94, 0.65)'
+              ],
+              borderColor: '#0f172a',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { boxWidth: 12, padding: 10 } }
+            },
+            scales: {
+              r: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { display: false } }
+            }
+          }
+        });
+      } catch (e) {
+        console.error('Failed to load mission type data:', e);
+      }
+    }
+
+    let currentSearchQuery = '';
+    let searchDebounceTimer = null;
+
+    async function fetchMissions(page, query = '') {
+      try {
+        currentSearchQuery = query;
+        const qParam = query ? `&search=${encodeURIComponent(query)}` : '';
+        const res = await fetch(`/api/missions/list?page=${page}&limit=${pageSize}${qParam}`);
+        const json = await res.json();
+        const missions = json.data;
+        allMissionsCache = missions;
+        renderTable(missions);
+
+        const totalPages = json.pagination.total_pages || Math.max(1, Math.ceil(json.pagination.total / pageSize));
+        currentPage = page;
+        const searchLabel = query ? ` matching "${query}"` : '';
+        document.getElementById('page-info').innerText = `Page ${page} of ${totalPages} (${json.pagination.total} missions${searchLabel})`;
+        document.getElementById('btn-prev').disabled = page <= 1;
+        document.getElementById('btn-next').disabled = page >= totalPages;
+      } catch (e) {
+        console.error('Failed to load missions list:', e);
+      }
+    }
+
+    function renderTable(missions) {
+      const tbody = document.getElementById('missions-table-body');
+      if (!missions || missions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-dim); padding: 2rem;">No matching missions found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = missions.map(m => {
+        let badgeClass = 'badge-success';
+        const st = (m.mission_status || '').toLowerCase();
+        if (st.includes('fail') && !st.includes('partial')) badgeClass = 'badge-failure';
+        else if (st.includes('partial')) badgeClass = 'badge-partial';
+
+        return `
+          <tr>
+            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent-cyan);">${m.year || '--'}</td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">${m.launch_date || '--'}</td>
+            <td style="font-weight: 500;">${m.company || 'Unknown'}</td>
+            <td>${m.rocket || 'Unknown'}</td>
+            <td>${m.country || 'Unknown'}</td>
+            <td style="color: var(--text-muted); font-size: 0.78rem;">${m.launch_site || 'Unknown'}</td>
+            <td><span style="font-size: 0.78rem; color: var(--text-muted);">${m.mission_type || 'Commercial'}</span></td>
+            <td><span class="badge-status ${badgeClass}">${m.mission_status || 'Unknown'}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Pagination events
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      if (currentPage > 1) fetchMissions(currentPage - 1, currentSearchQuery);
+    });
+
+    document.getElementById('btn-next').addEventListener('click', () => {
+      fetchMissions(currentPage + 1, currentSearchQuery);
+    });
+
+    // Server-side debounced search filter across entire space missions database
+    document.getElementById('table-search').addEventListener('input', (e) => {
+      clearTimeout(searchDebounceTimer);
+      const q = e.target.value.trim();
+      searchDebounceTimer = setTimeout(() => {
+        fetchMissions(1, q);
+      }, 250);
+    });
+  </script>
+</body>
+</html>
